@@ -1,0 +1,676 @@
+/* 
+ * Habit Tracker - Custom CSS Styles
+ * Main style file for the Habit Tracker application
+ */
+
+/* Base Styles */
+body {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Sidebar styles */
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: .5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: #333;
+    padding: 0.75rem 1rem;
+    border-left: 3px solid transparent;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+    border-left: 3px solid rgba(0, 123, 255, 0.4);
+}
+
+.sidebar .nav-link.active {
+    color: #0d6efd;
+    background-color: rgba(0, 123, 255, 0.1);
+    border-left: 3px solid #0d6efd;
+}
+
+.sidebar .nav-link i {
+    margin-right: 0.5rem;
+}
+
+/* Card customizations */
+.card {
+    box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+}
+
+.card-header {
+    border-top-left-radius: 0.5rem !important;
+    border-top-right-radius: 0.5rem !important;
+}
+
+/* Badge customizations */
+.badge {
+    font-weight: 600;
+    padding: 0.35em 0.65em;
+}
+
+/* Progress bars */
+.progress {
+    height: 0.75rem;
+    border-radius: 1rem;
+}
+
+.progress-bar {
+    border-radius: 1rem;
+}
+
+/* Habit card styles */
+.habit-card {
+    transition: all 0.3s ease;
+}
+
+.habit-card:hover {
+    transform: translateY(-5px);
+}
+
+.habit-card .card-header {
+    font-weight: 600;
+}
+
+.habit-card.completed {
+    opacity: 0.8;
+}
+
+.habit-card .streak-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    border: 2px solid white;
+}
+
+/* Goal card styles */
+.goal-card .progress {
+    height: 0.5rem;
+}
+
+/* Challenge card styles */
+.challenge-card .task-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Journal card styles */
+.journal-entry .mood-icon {
+    font-size: 1.5rem;
+}
+
+/* Profile page styles */
+.profile-header {
+    background-color: #4e54c8;
+    background-image: linear-gradient(to right, #4e54c8, #8f94fb);
+    color: white;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+    border-radius: 0.5rem;
+}
+
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid white;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.profile-stats .card {
+    height: 100%;
+}
+
+/* Achievements page styles */
+.achievement-card {
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.achievement-card:hover {
+    transform: translateY(-10px);
+}
+
+.achievement-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.achievement-card.locked {
+    opacity: 0.5;
+    filter: grayscale(100%);
+}
+
+.achievement-card.locked:hover {
+    transform: none;
+}
+
+/* Analytics page styles */
+.analytics-card {
+    margin-bottom: 1.5rem;
+}
+
+.analytics-card .card-body {
+    height: 300px;
+}
+
+/* Dashboard welcome section */
+.welcome-section {
+    background-color: #4e54c8;
+    background-image: linear-gradient(to right, #4e54c8, #8f94fb);
+    color: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* XP progress bar */
+.xp-progress {
+    height: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 1rem;
+}
+
+.xp-progress .progress-bar {
+    background-color: #ffc107;
+}
+
+/* Level badges */
+.level-badge {
+    width: 100px;
+    height: 100px;
+    line-height: 100px;
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    background-color: #ffc107;
+    color: white;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Notification styles */
+.notification-dropdown {
+    min-width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.notification-item:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.notification-item.unread {
+    border-left: 3px solid #0d6efd;
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.notification-icon {
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+}
+
+/* Modal customizations */
+.modal-header {
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+
+.modal-footer {
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+}
+
+/* Custom animations */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pulse-animation {
+    animation: pulse 1s infinite;
+}
+
+/* Custom utilities */
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+    .sidebar {
+        position: static;
+        height: auto;
+        padding-top: 0;
+    }
+    
+    .sidebar-sticky {
+        height: auto;
+    }
+    
+    main {
+        margin-left: 0 !important;
+    }
+    
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+/* 
+ * Habit Tracker - Theme Styles
+ */
+
+/* Light Theme (Default) */
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    
+    --body-bg: #f8f9fa;
+    --body-color: #212529;
+    --card-bg: #fff;
+    --card-border: rgba(0, 0, 0, 0.125);
+    --card-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+    --header-bg: #4e54c8;
+    --header-gradient: linear-gradient(to right, #4e54c8, #8f94fb);
+    --sidebar-bg: #f8f9fa;
+    --sidebar-active: rgba(13, 110, 253, 0.1);
+    --sidebar-hover: rgba(13, 110, 253, 0.05);
+    --navbar-bg: var(--primary-color);
+    --navbar-color: #fff;
+    --input-bg: #fff;
+    --input-border: #ced4da;
+    --modal-bg: #fff;
+}
+
+/* Dark Theme */
+[data-bs-theme="dark"] {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    
+    --body-bg: #212529;
+    --body-color: #f8f9fa;
+    --card-bg: #2c3034;
+    --card-border: rgba(255, 255, 255, 0.125);
+    --card-shadow: 0 .125rem .25rem rgba(0, 0, 0, .5);
+    --header-bg: #2c3034;
+    --header-gradient: linear-gradient(to right, #1a1d20, #2c3034);
+    --sidebar-bg: #2c3034;
+    --sidebar-active: rgba(255, 255, 255, 0.1);
+    --sidebar-hover: rgba(255, 255, 255, 0.05);
+    --navbar-bg: #212529;
+    --navbar-color: #fff;
+    --input-bg: #2c3034;
+    --input-border: #495057;
+    --modal-bg: #2c3034;
+}
+
+/* Apply theme variables */
+body {
+    background-color: var(--body-bg);
+    color: var(--body-color);
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-color: var(--card-border);
+    box-shadow: var(--card-shadow);
+}
+
+.navbar-dark {
+    background-color: var(--navbar-bg) !important;
+}
+
+.sidebar {
+    background-color: var(--sidebar-bg);
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--sidebar-active);
+}
+
+.sidebar .nav-link:hover {
+    background-color: var(--sidebar-hover);
+}
+
+.form-control, .form-select {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--body-color);
+}
+
+.modal-content {
+    background-color: var(--modal-bg);
+    color: var(--body-color);
+}
+
+.profile-header {
+    background-color: var(--header-bg);
+    background-image: var(--header-gradient);
+}
+
+/* Color Schemes */
+
+/* Default (Blue) Color Scheme - No Override needed */
+.color-default {
+    /* Uses the default --primary-color value */
+}
+
+/* Teal Color Scheme */
+.color-teal {
+    --primary-color: #20c997;
+    --navbar-bg: var(--primary-color);
+    --header-bg: #20c997;
+    --header-gradient: linear-gradient(to right, #20c997, #5ce0b8);
+}
+
+/* Indigo Color Scheme */
+.color-indigo {
+    --primary-color: #6610f2;
+    --navbar-bg: var(--primary-color);
+    --header-bg: #6610f2;
+    --header-gradient: linear-gradient(to right, #6610f2, #8540f5);
+}
+
+/* Rose Color Scheme */
+.color-rose {
+    --primary-color: #e83e8c;
+    --navbar-bg: var(--primary-color);
+    --header-bg: #e83e8c;
+    --header-gradient: linear-gradient(to right, #e83e8c, #f07eaf);
+}
+
+/* Amber Color Scheme */
+.color-amber {
+    --primary-color: #fd7e14;
+    --navbar-bg: var(--primary-color);
+    --header-bg: #fd7e14;
+    --header-gradient: linear-gradient(to right, #fd7e14, #ffaa61);
+}
+
+/* Emerald Color Scheme */
+.color-emerald {
+    --primary-color: #28a745;
+    --navbar-bg: var(--primary-color);
+    --header-bg: #28a745;
+    --header-gradient: linear-gradient(to right, #28a745, #5dd879);
+}
+
+/* Animation and Transitions */
+.enable-animations .card,
+.enable-animations .btn,
+.enable-animations .form-control,
+.enable-animations .nav-link {
+    transition: all 0.3s ease;
+}
+
+.enable-animations .habit-card:hover {
+    transform: translateY(-5px);
+}
+
+.enable-animations .achievement-card:hover {
+    transform: translateY(-10px);
+}
+
+.enable-animations .pulse-animation {
+    animation: pulse 1s infinite;
+}
+
+/* Compact Mode */
+.compact-mode main {
+    padding: 0.5rem !important;
+}
+
+.compact-mode .card {
+    margin-bottom: 0.5rem;
+}
+
+.compact-mode .card-body {
+    padding: 0.75rem;
+}
+
+.compact-mode .card-header,
+.compact-mode .card-footer {
+    padding: 0.5rem 0.75rem;
+}
+
+.compact-mode .table td, 
+.compact-mode .table th {
+    padding: 0.4rem;
+}
+
+.compact-mode .form-control {
+    padding: 0.25rem 0.5rem;
+}
+
+.compact-mode .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.compact-mode h1, .compact-mode .h1 {
+    font-size: 1.75rem;
+}
+
+.compact-mode h2, .compact-mode .h2 {
+    font-size: 1.5rem;
+}
+
+.compact-mode h3, .compact-mode .h3 {
+    font-size: 1.25rem;
+}
+
+.compact-mode h4, .compact-mode .h4 {
+    font-size: 1.125rem;
+}
+
+/* Theme support for sidebar */
+.sidebar.bg-dark {
+    background-color: #343a40 !important;
+}
+
+.sidebar.bg-dark .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.sidebar.bg-dark .nav-link:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.sidebar.bg-dark .nav-link.active {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 3px solid #fff;
+}
+
+.sidebar.bg-dark .sidebar-heading {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Compact mode styles */
+.sidebar-compact .nav-link {
+    padding: 0.5rem 1rem;
+}
+
+.sidebar-compact .sidebar-heading {
+    margin-top: 0.7rem;
+    margin-bottom: 0.3rem;
+}
+
+/* Color scheme modifications */
+.color-teal .sidebar .nav-link.active {
+    color: #20c997;
+    border-left-color: #20c997;
+}
+
+.color-indigo .sidebar .nav-link.active {
+    color: #6610f2;
+    border-left-color: #6610f2;
+}
+
+.color-rose .sidebar .nav-link.active {
+    color: #e83e8c;
+    border-left-color: #e83e8c;
+}
+
+.color-amber .sidebar .nav-link.active {
+    color: #fd7e14;
+    border-left-color: #fd7e14;
+}
+
+.color-emerald .sidebar .nav-link.active {
+    color: #28a745;
+    border-left-color: #28a745;
+}
+
+/* Custom theme implementation */
+body[data-custom-theme="dark"] {
+    background-color: #212529;
+    color: #f8f9fa;
+}
+
+body[data-custom-theme="dark"] .sidebar {
+    background-color: #343a40 !important;
+}
+
+body[data-custom-theme="dark"] .sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+body[data-custom-theme="dark"] .sidebar .nav-link:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+body[data-custom-theme="dark"] .sidebar .nav-link.active {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+body[data-custom-theme="dark"] .text-muted {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+/* Dark mode improvements for profile page stats cards */
+[data-bs-theme="dark"] .profile-stats .card {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-bs-theme="dark"] .profile-stats .card-body {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+[data-bs-theme="dark"] .profile-stats .card-body h4 {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+[data-bs-theme="dark"] .profile-stats .card-body small {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Improve visibility of background-light cards in dark mode */
+[data-bs-theme="dark"] .bg-light {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Enhance contrast for statistics cards */
+[data-bs-theme="dark"] .profile-stats .bg-primary,
+[data-bs-theme="dark"] .profile-stats .bg-warning,
+[data-bs-theme="dark"] .profile-stats .bg-success {
+    background-color: rgba(var(--bs-primary-rgb), 0.2) !important;
+    border: 1px solid rgba(var(--bs-primary-rgb), 0.3);
+}
+
+[data-bs-theme="dark"] .profile-stats .bg-primary h4,
+[data-bs-theme="dark"] .profile-stats .bg-warning h4,
+[data-bs-theme="dark"] .profile-stats .bg-success h4 {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Improve badge visibility in dark mode */
+[data-bs-theme="dark"] .level-badge {
+    background-color: rgba(255, 193, 7, 0.2) !important;
+    color: rgba(255, 193, 7, 0.9) !important;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+/* Enhance XP progress bar in dark mode */
+[data-bs-theme="dark"] .xp-progress {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-bs-theme="dark"] .xp-progress .progress-bar {
+    background-color: rgba(255, 193, 7, 0.7);
+}
+
+/* Make sure text is readable in dark mode */
+[data-bs-theme="dark"] .profile-header {
+    background-color: rgba(78, 84, 200, 0.2) !important;
+    background-image: linear-gradient(to right, rgba(78, 84, 200, 0.2), rgba(143, 148, 251, 0.2)) !important;
+}
+
+[data-bs-theme="dark"] .profile-header h1,
+[data-bs-theme="dark"] .profile-header .lead {
+    color: rgba(255, 255, 255, 0.9);
+}

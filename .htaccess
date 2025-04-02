@@ -1,0 +1,27 @@
+# Habit Tracker - .htaccess File
+
+# Enable the rewrite engine
+RewriteEngine On
+
+# Specify base directory - adjust if your app is in a subdirectory
+RewriteBase /habit-tracker/
+
+# Prevent direct browser access to PHP files in restricted directories
+# But allow PHP includes
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s+(controllers|models|config|utils)/.*\.php [NC]
+RewriteRule ^ - [F,L]
+
+# Set default index file
+DirectoryIndex index.php
+
+# Prevent viewing .htaccess file
+<Files .htaccess>
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Prevent directory listing
+Options -Indexes
+
+# Set the default character set
+AddDefaultCharset UTF-8
