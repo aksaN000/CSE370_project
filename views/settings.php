@@ -629,123 +629,123 @@ include '../views/partials/header.php';
                                 <h5 class="mb-0">Profile Privacy Settings</h5>
                             </div>
                             <div class="card-body">
-                                <form action="settings.php" method="POST" id="privacyForm">
-                                    <input type="hidden" name="update_privacy" value="1">
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">Profile Visibility</label>
-                                        <select class="form-select" name="profile_visibility" id="profileVisibility">
-                                            <option value="private" <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'selected' : ''; ?>>Private (Only you)</option>
-                                            <option value="friends" <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'friends' ? 'selected' : ''; ?>>Friends Only</option>
-                                            <option value="members" <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'members' ? 'selected' : ''; ?>>Community Members</option>
-                                            <option value="public" <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'public' ? 'selected' : ''; ?>>Public</option>
-                                        </select>
-                                        <div class="form-text">Control who can view your profile</div>
-                                    </div>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="publicProfile" name="public_profile" <?php echo $userSettings['public_profile'] ? 'checked' : ''; ?>>
-                                        <label class="form-check-label" for="publicProfile">Legacy Public Profile Setting</label>
-                                        <div class="form-text">This setting is maintained for compatibility. Use the Profile Visibility setting above for more control.</div>
-                                    </div>
-                                    
-                                    <hr class="my-4">
-                                    
-                                    <h6 class="mb-3">Profile Information Visibility</h6>
-                                    <p class="text-muted mb-3">Choose what information is visible to others when your profile is viewable:</p>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input profile-dependent" type="checkbox" role="switch" id="showStats" name="show_stats" <?php echo $userSettings['show_stats'] ? 'checked' : ''; ?> <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'disabled' : ''; ?>>
-                                        <label class="form-check-label" for="showStats">Show Statistics</label>
-                                        <div class="form-text">Display your activity statistics on your profile</div>
-                                    </div>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input profile-dependent" type="checkbox" role="switch" id="showAchievements" name="show_achievements" <?php echo $userSettings['show_achievements'] ? 'checked' : ''; ?> <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'disabled' : ''; ?>>
-                                        <label class="form-check-label" for="showAchievements">Show Achievements</label>
-                                        <div class="form-text">Display your badges and achievements on your profile</div>
-                                    </div>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input profile-dependent" type="checkbox" role="switch" id="showHabits" name="show_habits" <?php echo ($userSettings['show_habits'] ?? 0) ? 'checked' : ''; ?> <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'disabled' : ''; ?>>
-                                        <label class="form-check-label" for="showHabits">Show Habits</label>
-                                        <div class="form-text">Display your habits on your profile</div>
-                                    </div>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input profile-dependent" type="checkbox" role="switch" id="showGoals" name="show_goals" <?php echo ($userSettings['show_goals'] ?? 0) ? 'checked' : ''; ?> <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'disabled' : ''; ?>>
-                                        <label class="form-check-label" for="showGoals">Show Goals</label>
-                                        <div class="form-text">Display your goals on your profile</div>
-                                    </div>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input profile-dependent" type="checkbox" role="switch" id="showChallenges" name="show_challenges" <?php echo ($userSettings['show_challenges'] ?? 1) ? 'checked' : ''; ?> <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'disabled' : ''; ?>>
-                                        <label class="form-check-label" for="showChallenges">Show Challenges</label>
-                                        <div class="form-text">Display the challenges you've participated in</div>
-                                    </div>
-                                    
-                                    <hr class="my-4">
-                                    
-                                    <h6 class="mb-3">Community Interaction</h6>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="allowChallengeInvites" name="allow_challenge_invites" <?php echo ($userSettings['allow_challenge_invites'] ?? 1) ? 'checked' : ''; ?>>
-                                        <label class="form-check-label" for="allowChallengeInvites">Allow Challenge Invitations</label>
-                                        <div class="form-text">Allow other users to invite you to challenges</div>
-                                    </div>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="showInLeaderboards" name="show_in_leaderboards" <?php echo ($userSettings['show_in_leaderboards'] ?? 1) ? 'checked' : ''; ?>>
-                                        <label class="form-check-label" for="showInLeaderboards">Show in Leaderboards</label>
-                                        <div class="form-text">Display your name in public leaderboards</div>
-                                    </div>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="allowFriendRequests" name="allow_friend_requests" <?php echo ($userSettings['allow_friend_requests'] ?? 1) ? 'checked' : ''; ?>>
-                                        <label class="form-check-label" for="allowFriendRequests">Allow Friend Requests</label>
-                                        <div class="form-text">Allow other users to send you friend requests</div>
-                                    </div>
-                                    
-                                    <hr class="my-4">
-                                    
-                                    <h6 class="mb-3">Data & Privacy</h6>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="analyticsConsent" name="analytics_consent" <?php echo $userSettings['analytics_consent'] ? 'checked' : ''; ?>>
-                                        <label class="form-check-label" for="analyticsConsent">Usage Analytics</label>
-                                        <div class="form-text">Allow collection of anonymous usage data to improve the app</div>
-                                    </div>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="featureImprovementConsent" name="feature_improvement_consent" <?php echo ($userSettings['feature_improvement_consent'] ?? 0) ? 'checked' : ''; ?>>
-                                        <label class="form-check-label" for="featureImprovementConsent">Feature Improvement Participation</label>
-                                        <div class="form-text">Participate in new feature testing and provide feedback</div>
-                                    </div>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="dataSharing" name="data_sharing" <?php echo ($userSettings['data_sharing'] ?? 0) ? 'checked' : ''; ?>>
-                                        <label class="form-check-label" for="dataSharing">Data Sharing for Research</label>
-                                        <div class="form-text">Allow anonymized data to be used for habit formation research</div>
-                                    </div>
-                                    
-                                    <div class="mt-4">
-                                        <div class="alert alert-info">
-                                            <div class="d-flex">
-                                                <div class="me-3">
-                                                    <i class="bi bi-info-circle-fill fs-4"></i>
-                                                </div>
-                                                <div>
-                                                    <h6>Privacy Notice</h6>
-                                                    <p class="mb-0">Your data is always kept secure and we never share your personal information with third parties without your explicit consent. Read our <a href="#" class="alert-link">Privacy Policy</a> for more information.</p>
-                                                </div>
+                            <form action="../controllers/process_update_privacy.php" method="POST" id="privacyForm">
+                                <input type="hidden" name="update_privacy" value="1">
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Profile Visibility</label>
+                                    <select class="form-select" name="profile_visibility" id="profileVisibility">
+                                        <option value="private" <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'selected' : ''; ?>>Private (Only you)</option>
+                                        <option value="friends" <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'friends' ? 'selected' : ''; ?>>Friends Only</option>
+                                        <option value="members" <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'members' ? 'selected' : ''; ?>>Community Members</option>
+                                        <option value="public" <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'public' ? 'selected' : ''; ?>>Public</option>
+                                    </select>
+                                    <div class="form-text">Control who can view your profile</div>
+                                </div>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="publicProfile" name="public_profile" <?php echo $userSettings['public_profile'] ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="publicProfile">Legacy Public Profile Setting</label>
+                                    <div class="form-text">This setting is maintained for compatibility. Use the Profile Visibility setting above for more control.</div>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                                <h6 class="mb-3">Profile Information Visibility</h6>
+                                <p class="text-muted mb-3">Choose what information is visible to others when your profile is viewable:</p>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input profile-dependent" type="checkbox" role="switch" id="showStats" name="show_stats" <?php echo $userSettings['show_stats'] ? 'checked' : ''; ?> <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'disabled' : ''; ?>>
+                                    <label class="form-check-label" for="showStats">Show Statistics</label>
+                                    <div class="form-text">Display your activity statistics on your profile</div>
+                                </div>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input profile-dependent" type="checkbox" role="switch" id="showAchievements" name="show_achievements" <?php echo $userSettings['show_achievements'] ? 'checked' : ''; ?> <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'disabled' : ''; ?>>
+                                    <label class="form-check-label" for="showAchievements">Show Achievements</label>
+                                    <div class="form-text">Display your badges and achievements on your profile</div>
+                                </div>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input profile-dependent" type="checkbox" role="switch" id="showHabits" name="show_habits" <?php echo ($userSettings['show_habits'] ?? 0) ? 'checked' : ''; ?> <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'disabled' : ''; ?>>
+                                    <label class="form-check-label" for="showHabits">Show Habits</label>
+                                    <div class="form-text">Display your habits on your profile</div>
+                                </div>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input profile-dependent" type="checkbox" role="switch" id="showGoals" name="show_goals" <?php echo ($userSettings['show_goals'] ?? 0) ? 'checked' : ''; ?> <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'disabled' : ''; ?>>
+                                    <label class="form-check-label" for="showGoals">Show Goals</label>
+                                    <div class="form-text">Display your goals on your profile</div>
+                                </div>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input profile-dependent" type="checkbox" role="switch" id="showChallenges" name="show_challenges" <?php echo ($userSettings['show_challenges'] ?? 1) ? 'checked' : ''; ?> <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'disabled' : ''; ?>>
+                                    <label class="form-check-label" for="showChallenges">Show Challenges</label>
+                                    <div class="form-text">Display the challenges you've participated in</div>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                                <h6 class="mb-3">Community Interaction</h6>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="allowChallengeInvites" name="allow_challenge_invites" <?php echo ($userSettings['allow_challenge_invites'] ?? 1) ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="allowChallengeInvites">Allow Challenge Invitations</label>
+                                    <div class="form-text">Allow other users to invite you to challenges</div>
+                                </div>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="showInLeaderboards" name="show_in_leaderboards" <?php echo ($userSettings['show_in_leaderboards'] ?? 1) ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="showInLeaderboards">Show in Leaderboards</label>
+                                    <div class="form-text">Display your name in public leaderboards</div>
+                                </div>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="allowFriendRequests" name="allow_friend_requests" <?php echo ($userSettings['allow_friend_requests'] ?? 1) ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="allowFriendRequests">Allow Friend Requests</label>
+                                    <div class="form-text">Allow other users to send you friend requests</div>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                                <h6 class="mb-3">Data & Privacy</h6>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="analyticsConsent" name="analytics_consent" <?php echo $userSettings['analytics_consent'] ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="analyticsConsent">Usage Analytics</label>
+                                    <div class="form-text">Allow collection of anonymous usage data to improve the app</div>
+                                </div>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="featureImprovementConsent" name="feature_improvement_consent" <?php echo ($userSettings['feature_improvement_consent'] ?? 0) ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="featureImprovementConsent">Feature Improvement Participation</label>
+                                    <div class="form-text">Participate in new feature testing and provide feedback</div>
+                                </div>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="dataSharing" name="data_sharing" <?php echo ($userSettings['data_sharing'] ?? 0) ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="dataSharing">Data Sharing for Research</label>
+                                    <div class="form-text">Allow anonymized data to be used for habit formation research</div>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <div class="alert alert-info">
+                                        <div class="d-flex">
+                                            <div class="me-3">
+                                                <i class="bi bi-info-circle-fill fs-4"></i>
+                                            </div>
+                                            <div>
+                                                <h6>Privacy Notice</h6>
+                                                <p class="mb-0">Your data is always kept secure and we never share your personal information with third parties without your explicit consent. Read our <a href="#" class="alert-link">Privacy Policy</a> for more information.</p>
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    <div class="text-end">
-                                        <button type="submit" class="btn btn-primary">Save Privacy Settings</button>
-                                    </div>
-                                </form>
+                                </div>
+                                
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary">Save Privacy Settings</button>
+                                </div>
+                            </form>
                             </div>
                             <div class="card-footer">
                                 <small class="text-muted">Last updated: <?php echo formatDate($userSettings['updated_at'] ?? date('Y-m-d H:i:s'), 'F j, Y, g:i a'); ?></small>
