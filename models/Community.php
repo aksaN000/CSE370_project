@@ -295,24 +295,50 @@ class Community {
     
     // Get user's profile
     public function getUserProfile($user_id) {
-        $query = "SELECT u.id, u.username, u.level, u.current_xp, u.created_at,
+        // Fetch basic user profile data with minimal joins
+        $query = "SELECT 
+                  u.id, 
+                  u.username, 
+                  u.level, 
+                  u.current_xp, 
+                  u.created_at,
+                  us.profile_visibility, 
+                  us.public_profile,
+                  us.show_stats, 
+                  us.show_achievements,
+                  us.show_habits, 
+                  us.show_goals, 
+                  us.show_challenges,
                   (SELECT COUNT(*) FROM habits WHERE user_id = u.id) as total_habits,
                   (SELECT COUNT(*) FROM goals WHERE user_id = u.id) as total_goals,
                   (SELECT COUNT(*) FROM challenges WHERE creator_id = u.id) as total_challenges,
                   (SELECT COUNT(*) FROM habit_completions WHERE user_id = u.id) as total_completions,
-                  (SELECT COUNT(*) FROM " . $this->friends_table . " WHERE user_id = u.id) as friend_count,
-                  us.profile_visibility, us.public_profile, us.show_stats, us.show_habits, us.show_goals,
-                  us.show_challenges, us.show_achievements
+                  (SELECT COUNT(*) FROM user_friends WHERE user_id = u.id OR friend_id = u.id) as friend_count
                   FROM users u
                   LEFT JOIN user_settings us ON u.id = us.user_id
                   WHERE u.id = :user_id
-                  LIMIT 0,1";
+                  LIMIT 1";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
         $stmt->execute();
         
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$profile) {
+            return null;
+        }
+        
+        // Set default values for settings if not found
+        $profile['profile_visibility'] = $profile['profile_visibility'] ?? 'private';
+        $profile['public_profile'] = $profile['public_profile'] ?? 0;
+        $profile['show_stats'] = $profile['show_stats'] ?? 0;
+        $profile['show_achievements'] = $profile['show_achievements'] ?? 1;
+        $profile['show_habits'] = $profile['show_habits'] ?? 0;
+        $profile['show_goals'] = $profile['show_goals'] ?? 0;
+        $profile['show_challenges'] = $profile['show_challenges'] ?? 1;
+        
+        return $profile;
     }
     
     // Get leaderboard

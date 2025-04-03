@@ -145,73 +145,33 @@ class CommunityController {
 
     // Get special achievements for a user
     private function getSpecialAchievements($user_id) {
-        return [
+        $special_achievements = [
+            // Habit-related special achievements
             'early_bird' => $this->checkEarlyBirdAchievement($user_id),
             'perfectionist' => $this->checkPerfectionistAchievement($user_id),
+            
+            // Goal-related special achievements
             'goal_crusher' => $this->checkGoalCrusherAchievement($user_id),
+            
+            // Challenge-related special achievements
             'social_butterfly' => $this->checkSocialButterflyAchievement($user_id),
+            
+            // Journal-related special achievements
             'deep_thinker' => $this->checkDeepThinkerAchievement($user_id)
         ];
-    }
-
-    // Optimized Perfectionist Achievement method without window functions
-private function checkPerfectionistAchievement($user_id) {
-    // First, get all unique completion dates for the user's habits
-    $query = "SELECT DISTINCT DATE(hc.completion_date) as completion_date
-              FROM habit_completions hc
-              JOIN habits h ON hc.habit_id = h.id
-              WHERE h.user_id = :user_id
-              ORDER BY completion_date";
-    
-    $stmt = $this->conn->prepare($query);
-    $stmt->bindParam(':user_id', $user_id);
-    $stmt->execute();
-    
-    $dates = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    
-    // Check for 7 consecutive days of habit completions
-    $max_consecutive_days = 0;
-    $current_streak = 1;
-    $last_date = null;
-    
-    foreach ($dates as $date) {
-        $current_date = new DateTime($date);
         
-        if ($last_date !== null) {
-            $interval = $last_date->diff($current_date);
-            
-            if ($interval->days === 1) {
-                $current_streak++;
-                
-                // Update max streak if current streak is longer
-                $max_consecutive_days = max($max_consecutive_days, $current_streak);
-            } elseif ($interval->days > 1) {
-                // Reset streak if there's a gap
-                $current_streak = 1;
-            }
-        }
-        
-        $last_date = $current_date;
+        return array_filter($special_achievements);
     }
-    
-    // Check if the user has a 7-day streak and completed all habits on those days
-    return $max_consecutive_days >= 7 ? [
-        'name' => 'Perfectionist',
-        'description' => 'Complete all habits for 7 consecutive days',
-        'icon' => 'calendar-check',
-        'color' => 'success'
-    ] : null;
-}
 
     // Check Early Bird Achievement (5 habits before 9 AM)
     private function checkEarlyBirdAchievement($user_id) {
-        $query = "SELECT COUNT(DISTINCT DATE(hc.completion_date)) as early_habit_days
+        $query = "SELECT COUNT(*) as early_habits 
                   FROM habit_completions hc
                   JOIN habits h ON hc.habit_id = h.id
                   WHERE h.user_id = :user_id 
                   AND TIME(hc.completion_date) < '09:00:00'
                   GROUP BY DATE(hc.completion_date)
-                  HAVING early_habit_days >= 5
+                  HAVING early_habits >= 5
                   LIMIT 1";
         
         $stmt = $this->conn->prepare($query);
@@ -225,7 +185,38 @@ private function checkPerfectionistAchievement($user_id) {
             'color' => 'warning'
         ] : null;
     }
-    
+
+    // Check Perfectionist Achievement (7 consecutive days of all habit completions)
+    private function checkPerfectionistAchievement($user_id) {
+        $query = "SELECT MAX(consecutive_days) as max_streak
+                  FROM (
+                      SELECT 
+                          DATE_SUB(completion_date, INTERVAL ROW_NUMBER() OVER (ORDER BY completion_date) DAY) as date_group,
+                          COUNT(*) as consecutive_days
+                      FROM (
+                          SELECT DISTINCT DATE(hc.completion_date) as completion_date
+                          FROM habit_completions hc
+                          JOIN habits h ON hc.habit_id = h.id
+                          WHERE h.user_id = :user_id
+                          GROUP BY DATE(hc.completion_date)
+                      ) unique_dates
+                      GROUP BY date_group
+                  ) streaks
+                  WHERE consecutive_days >= 7";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->execute();
+        
+        return $stmt->rowCount() > 0 ? [
+            'name' => 'Perfectionist',
+            'description' => 'Complete all habits for 7 consecutive days',
+            'icon' => 'calendar-check',
+            'color' => 'success'
+        ] : null;
+    }
+
+    // Check Goal Crusher Achievement (10 goals completed)
     private function checkGoalCrusherAchievement($user_id) {
         $query = "SELECT COUNT(*) as completed_goals 
                   FROM goals 
@@ -244,7 +235,8 @@ private function checkPerfectionistAchievement($user_id) {
             'color' => 'danger'
         ] : null;
     }
-    
+
+    // Check Social Butterfly Achievement (5 challenges completed)
     private function checkSocialButterflyAchievement($user_id) {
         $query = "SELECT COUNT(*) as completed_challenges 
                   FROM challenge_participants 
@@ -263,7 +255,8 @@ private function checkPerfectionistAchievement($user_id) {
             'color' => 'primary'
         ] : null;
     }
-    
+
+    // Check Deep Thinker Achievement (20 journal entries)
     private function checkDeepThinkerAchievement($user_id) {
         $query = "SELECT COUNT(*) as journal_entries 
                   FROM journal_entries 
@@ -309,77 +302,35 @@ private function checkPerfectionistAchievement($user_id) {
         if($current_user_id) {
             $profile['is_friend'] = $this->community->areFriends($current_user_id, $user_id);
             
-            // Optimize friend request checking
-            $profile['has_sent_request'] = $this->checkFriendRequest($current_user_id, $user_id, 'sent');
-            $profile['has_received_request'] = $this->checkFriendRequest($current_user_id, $user_id, 'received');
+            // Check if there's a pending friend request
+            $incoming = $this->community->getIncomingFriendRequests($current_user_id);
+            $outgoing = $this->community->getOutgoingFriendRequests($current_user_id);
             
-            if($profile['has_received_request']) {
-                // Get the request ID
-                $request = $this->getFriendRequestId($current_user_id, $user_id);
-                $profile['request_id'] = $request ? $request['id'] : null;
+            $profile['has_sent_request'] = false;
+            $profile['has_received_request'] = false;
+            
+            foreach($incoming as $request) {
+                if($request['sender_id'] == $user_id) {
+                    $profile['has_received_request'] = true;
+                    $profile['request_id'] = $request['id'];
+                    break;
+                }
+            }
+            
+            foreach($outgoing as $request) {
+                if($request['recipient_id'] == $user_id) {
+                    $profile['has_sent_request'] = true;
+                    break;
+                }
             }
         }
         
-        // Limit achievement fetching to prevent memory exhaustion
-        $profile['achievements'] = $this->getLimitedAchievements($user_id, $current_user_id);
+        // Add achievements to profile data
+        $profile['achievements'] = $this->getUserProfileAchievements($user_id, $current_user_id);
         
         return [
             'success' => true,
             'profile' => $profile
-        ];
-    }
-    
-    // Optimized friend request checking
-    private function checkFriendRequest($current_user_id, $target_user_id, $type = 'sent') {
-        $query = $type === 'sent' 
-            ? "SELECT COUNT(*) as count FROM friend_requests WHERE sender_id = :sender_id AND recipient_id = :recipient_id"
-            : "SELECT COUNT(*) as count FROM friend_requests WHERE sender_id = :recipient_id AND recipient_id = :sender_id";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':sender_id', $current_user_id);
-        $stmt->bindParam(':recipient_id', $target_user_id);
-        $stmt->execute();
-        
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result['count'] > 0;
-    }
-    
-    // Get friend request ID
-    private function getFriendRequestId($current_user_id, $target_user_id) {
-        $query = "SELECT id FROM friend_requests 
-                  WHERE sender_id = :recipient_id AND recipient_id = :sender_id 
-                  LIMIT 1";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':sender_id', $current_user_id);
-        $stmt->bindParam(':recipient_id', $target_user_id);
-        $stmt->execute();
-        
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-    
-    // Limit achievements to prevent memory exhaustion
-    private function getLimitedAchievements($user_id, $current_user_id) {
-        // Limit the number of achievements fetched
-        $query = "SELECT l.level_number, l.title, l.badge_name, l.badge_description, l.badge_image 
-                  FROM user_achievements ua
-                  JOIN levels l ON ua.level_id = l.id
-                  WHERE ua.user_id = :user_id
-                  ORDER BY l.level_number ASC
-                  LIMIT 10";  // Limit to 10 most recent achievements
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':user_id', $user_id);
-        $stmt->execute();
-        
-        $achievements = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        // Fetch a few special achievements
-        $special_achievements = array_slice($this->getSpecialAchievements($user_id), 0, 5);
-        
-        return [
-            'level_achievements' => $achievements,
-            'special_achievements' => $special_achievements
         ];
     }
 

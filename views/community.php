@@ -5,7 +5,9 @@
 require_once __DIR__ . '/../controllers/AuthController.php';
 require_once __DIR__ . '/../controllers/CommunityController.php';
 require_once __DIR__ . '/../utils/helpers.php';
-
+require_once __DIR__ . '/../controllers/HabitController.php';
+require_once __DIR__ . '/../controllers/GoalController.php';
+require_once __DIR__ . '/../controllers/ChallengeController.php';
 // This detects if a notification was clicked and marks it as read
 
 // Check if a notification needs to be marked as read
@@ -433,7 +435,9 @@ include '../views/partials/header.php';
                         </div>
                     </div>
                     
+                    
                     <div class="col-md-8 mb-4">
+                        <!-- Statistics Section -->
                         <div class="card mb-4">
                             <div class="card-header bg-primary text-white">
                                 <h5 class="mb-0">Statistics</h5>
@@ -449,6 +453,7 @@ include '../views/partials/header.php';
                                             <h2 class="display-5"><?php echo $profile['total_challenges'] ?? 0; ?></h2>
                                             <p class="text-muted">Challenges</p>
                                         </div>
+                                        <!-- Add more stats as needed -->
                                     </div>
                                 <?php else: ?>
                                     <div class="alert alert-info">
@@ -461,124 +466,317 @@ include '../views/partials/header.php';
                         <!-- Additional profile sections would continue here -->
                     </div>
                 </div>
-                
-            <?php elseif ($view === 'leaderboard'): ?>
-                <!-- Leaderboard View -->
-                <div class="row">
-                    <div class="col-md-8 mx-auto">
-                        <div class="card">
-                            <div class="card-header bg-warning text-dark">
-                                <h5 class="mb-0">Community Leaderboard</h5>
+            
+
+                <?php if (!empty($public_habits)): ?>
+                            <div class="card mb-4">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">Habits</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="list-group">
+                                        <?php foreach ($public_habits as $habit): ?>
+                                            <div class="list-group-item">
+                                                <h6 class="mb-1"><?php echo htmlspecialchars($habit['title']); ?></h6>
+                                                <p class="mb-1 small"><?php echo htmlspecialchars($habit['description']); ?></p>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-calendar-check"></i> 
+                                                    <?php echo ucfirst($habit['frequency_type']); ?>
+                                                    <?php if ($habit['streak'] > 1): ?>
+                                                        <span class="ms-2"><i class="bi bi-fire text-danger"></i> <?php echo $habit['streak']; ?> day streak</span>
+                                                    <?php endif; ?>
+                                                </small>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <!-- Leaderboard category tabs -->
-                                <ul class="nav nav-pills mb-4">
-                                    <li class="nav-item">
-                                        <a class="nav-link <?php echo $leaderboard_category === 'xp' ? 'active' : ''; ?>" href="community.php?view=leaderboard&category=xp">
-                                            <i class="bi bi-lightning-fill"></i> XP
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link <?php echo $leaderboard_category === 'habits' ? 'active' : ''; ?>" href="community.php?view=leaderboard&category=habits">
-                                            <i class="bi bi-check-circle-fill"></i> Most Habits
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link <?php echo $leaderboard_category === 'completions' ? 'active' : ''; ?>" href="community.php?view=leaderboard&category=completions">
-                                            <i class="bi bi-calendar-check-fill"></i> Most Completions
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link <?php echo $leaderboard_category === 'goals' ? 'active' : ''; ?>" href="community.php?view=leaderboard&category=goals">
-                                            <i class="bi bi-trophy-fill"></i> Goals Completed
-                                        </a>
-                                    </li>
-                                </ul>
-                                
-                                <?php if (empty($leaderboard['leaderboard'])): ?>
-                                    <div class="alert alert-info">
-                                        <i class="bi bi-info-circle"></i> No data available for this leaderboard.
+                        <?php endif; ?>
+                        
+                        <!-- Goals Section - Modified to respect privacy -->
+                        <?php if (!empty($public_goals)): ?>
+                            <div class="card mb-4">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0">Goals</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="list-group">
+                                        <?php foreach ($public_goals as $goal): ?>
+                                            <div class="list-group-item">
+                                                <h6 class="mb-1"><?php echo htmlspecialchars($goal['title']); ?></h6>
+                                                <p class="mb-1 small"><?php echo htmlspecialchars($goal['description']); ?></p>
+                                                <div class="progress mb-2" style="height: 5px;">
+                                                    <div class="progress-bar bg-warning" role="progressbar" 
+                                                         style="width: <?php echo $goal['progress_percentage']; ?>%;" 
+                                                         aria-valuenow="<?php echo $goal['progress_percentage']; ?>" 
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <small class="text-muted">
+                                                    Progress: <?php echo $goal['current_value']; ?>/<?php echo $goal['target_value']; ?>
+                                                    <?php if ($goal['is_completed']): ?>
+                                                        <span class="ms-2 badge bg-success">Completed</span>
+                                                    <?php endif; ?>
+                                                </small>
+                                            </div>
+                                        <?php endforeach; ?>
                                     </div>
-                                <?php else: ?>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col">Rank</th>
-                                                    <th scope="col">User</th>
-                                                    <th scope="col">Level</th>
-                                                    <th scope="col">
-                                                        <?php
-                                                        switch ($leaderboard_category) {
-                                                            case 'xp':
-                                                                echo 'Experience Points';
-                                                                break;
-                                                            case 'habits':
-                                                                echo 'Total Habits';
-                                                                break;
-                                                            case 'completions':
-                                                                echo 'Total Completions';
-                                                                break;
-                                                            case 'goals':
-                                                                echo 'Goals Completed';
-                                                                break;
-                                                        }
-                                                        ?>
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php foreach ($leaderboard['leaderboard'] as $index => $entry): ?>
-                                                    <tr <?php echo $entry['id'] == $user->id ? 'class="table-primary"' : ''; ?>>
-                                                        <th scope="row">
-                                                            <?php if ($index < 3): ?>
-                                                                <span class="badge bg-<?php echo $index === 0 ? 'warning' : ($index === 1 ? 'secondary' : 'danger'); ?> rounded-pill">
-                                                                    <?php echo $index + 1; ?>
-                                                                </span>
-                                                            <?php else: ?>
-                                                                <?php echo $index + 1; ?>
-                                                            <?php endif; ?>
-                                                        </th>
-                                                        <td>
-                                                            <a href="community.php?view=profile&id=<?php echo $entry['id']; ?>" class="text-decoration-none">
-                                                                <?php echo htmlspecialchars($entry['username']); ?>
-                                                                <?php echo $entry['id'] == $user->id ? ' (You)' : ''; ?>
-                                                            </a>
-                                                        </td>
-                                                        <td>Level <?php echo $entry['level']; ?></td>
-                                                        <td>
-                                                            <strong>
-                                                                <?php 
-                                                                if ($leaderboard_category === 'xp') {
-                                                                    echo number_format($entry['score']);
-                                                                } else {
-                                                                    echo $entry['score'];
-                                                                }
-                                                                ?>
-                                                            </strong>
-                                                        </td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            </tbody>
-                                        </table>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <!-- Challenges Section - Modified to respect privacy -->
+                        <?php if (!empty($public_challenges) && (!empty($public_challenges['active']) || !empty($public_challenges['completed']) || !empty($public_challenges['created']))): ?>
+                            <div class="card mb-4">
+                                <div class="card-header bg-danger text-white">
+                                    <h5 class="mb-0">Challenges</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="nav nav-tabs mb-3" id="challengeTabs" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab">
+                                                Active
+                                                <?php if (!empty($public_challenges['active'])): ?>
+                                                    <span class="badge bg-primary"><?php echo count($public_challenges['active']); ?></span>
+                                                <?php endif; ?>
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab">
+                                                Completed
+                                                <?php if (!empty($public_challenges['completed'])): ?>
+                                                    <span class="badge bg-success"><?php echo count($public_challenges['completed']); ?></span>
+                                                <?php endif; ?>
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="created-tab" data-bs-toggle="tab" data-bs-target="#created" type="button" role="tab">
+                                                Created
+                                                <?php if (!empty($public_challenges['created'])): ?>
+                                                    <span class="badge bg-info"><?php echo count($public_challenges['created']); ?></span>
+                                                <?php endif; ?>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                    
+                                    <div class="tab-content" id="challengeTabsContent">
+                                        <!-- Active Challenges Tab -->
+                                        <div class="tab-pane fade show active" id="active" role="tabpanel">
+                                            <?php if (empty($public_challenges['active'])): ?>
+                                                <div class="alert alert-info mb-0">No active challenges at the moment.</div>
+                                            <?php else: ?>
+                                                <div class="list-group">
+                                                    <?php foreach ($public_challenges['active'] as $challenge): ?>
+                                                        <div class="list-group-item">
+                                                            <h6 class="mb-1"><?php echo htmlspecialchars($challenge['title']); ?></h6>
+                                                            <p class="mb-1 small"><?php echo htmlspecialchars(substr($challenge['description'], 0, 100)) . (strlen($challenge['description']) > 100 ? '...' : ''); ?></p>
+                                                            <small class="text-muted">Ends: <?php echo date('M d, Y', strtotime($challenge['end_date'])); ?></small>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        
+                                        <!-- Completed Challenges Tab -->
+                                        <div class="tab-pane fade" id="completed" role="tabpanel">
+                                            <?php if (empty($public_challenges['completed'])): ?>
+                                                <div class="alert alert-info mb-0">No completed challenges yet.</div>
+                                            <?php else: ?>
+                                                <div class="list-group">
+                                                    <?php foreach ($public_challenges['completed'] as $challenge): ?>
+                                                        <div class="list-group-item">
+                                                            <h6 class="mb-1"><?php echo htmlspecialchars($challenge['title']); ?></h6>
+                                                            <p class="mb-1 small"><?php echo htmlspecialchars(substr($challenge['description'], 0, 100)) . (strlen($challenge['description']) > 100 ? '...' : ''); ?></p>
+                                                            <small class="text-muted">Completed: <?php echo date('M d, Y', strtotime($challenge['completion_date'] ?? $challenge['end_date'])); ?></small>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        
+                                        <!-- Created Challenges Tab -->
+                                        <div class="tab-pane fade" id="created" role="tabpanel">
+                                            <?php if (empty($public_challenges['created'])): ?>
+                                                <div class="alert alert-info mb-0">No created challenges.</div>
+                                            <?php else: ?>
+                                                <div class="list-group">
+                                                    <?php foreach ($public_challenges['created'] as $challenge): ?>
+                                                        <div class="list-group-item">
+                                                            <h6 class="mb-1"><?php echo htmlspecialchars($challenge['title']); ?></h6>
+                                                            <p class="mb-1 small"><?php echo htmlspecialchars(substr($challenge['description'], 0, 100)) . (strlen($challenge['description']) > 100 ? '...' : ''); ?></p>
+                                                            <small class="text-muted">Participants: <?php echo $challenge['participant_count'] ?? 0; ?></small>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
-                                <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        
+                       <!-- Achievements Section - Respect show_achievements setting -->
+                        <?php if ($profile['show_achievements'] || $profile['id'] === $user->id): ?>
+                            <div class="card mb-4">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">Achievements</h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Level Achievements -->
+                                    <h6>Level Achievements</h6>
+                                    <ul class="list-group mb-3">
+                                        <?php foreach ($profile['achievements']['level_achievements'] as $achievement): ?>
+                                            <li class="list-group-item">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <strong><?php echo $achievement['title']; ?></strong>
+                                                    </div>
+                                                    <?php if ($achievement['badge_image']): ?>
+                                                        <img src="<?php echo $achievement['badge_image']; ?>" alt="<?php echo $achievement['badge_name']; ?>" width="50">
+                                                    <?php endif; ?>
+                                                </div>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                    
+                                    <!-- Special Achievements -->
+                                    <h6>Special Achievements</h6>
+                                    <ul class="list-group">
+                                        <?php foreach ($profile['achievements']['special_achievements'] as $achievement): ?>
+                                            <?php if ($achievement): ?>
+                                                <li class="list-group-item">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <strong><?php echo $achievement['name']; ?></strong>
+                                                        </div>
+                                                        <i class="bi bi-<?php echo $achievement['icon']; ?> text-<?php echo $achievement['color']; ?> fs-2"></i>
+                                                    </div>
+                                                </li>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                                            </div>
+                                        </div>
+                                        
+                                    <?php elseif ($view === 'leaderboard'): ?>
+                                        <!-- Leaderboard View -->
+                                        <div class="row">
+                                            <div class="col-md-8 mx-auto">
+                                                <div class="card">
+                                                    <div class="card-header bg-warning text-dark">
+                                                        <h5 class="mb-0">Community Leaderboard</h5>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <!-- Leaderboard category tabs -->
+                                                        <ul class="nav nav-pills mb-4">
+                                                            <li class="nav-item">
+                                                                <a class="nav-link <?php echo $leaderboard_category === 'xp' ? 'active' : ''; ?>" href="community.php?view=leaderboard&category=xp">
+                                                                    <i class="bi bi-lightning-fill"></i> XP
+                                                                </a>
+                                                            </li>
+                                                            <li class="nav-item">
+                                                                <a class="nav-link <?php echo $leaderboard_category === 'habits' ? 'active' : ''; ?>" href="community.php?view=leaderboard&category=habits">
+                                                                    <i class="bi bi-check-circle-fill"></i> Most Habits
+                                                                </a>
+                                                            </li>
+                                                            <li class="nav-item">
+                                                                <a class="nav-link <?php echo $leaderboard_category === 'completions' ? 'active' : ''; ?>" href="community.php?view=leaderboard&category=completions">
+                                                                    <i class="bi bi-calendar-check-fill"></i> Most Completions
+                                                                </a>
+                                                            </li>
+                                                            <li class="nav-item">
+                                                                <a class="nav-link <?php echo $leaderboard_category === 'goals' ? 'active' : ''; ?>" href="community.php?view=leaderboard&category=goals">
+                                                                    <i class="bi bi-trophy-fill"></i> Goals Completed
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                        
+                                                        <?php if (empty($leaderboard['leaderboard'])): ?>
+                                                            <div class="alert alert-info">
+                                                                <i class="bi bi-info-circle"></i> No data available for this leaderboard.
+                                                            </div>
+                                                        <?php else: ?>
+                                                            <div class="table-responsive">
+                                                                <table class="table table-hover">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th scope="col">Rank</th>
+                                                                            <th scope="col">User</th>
+                                                                            <th scope="col">Level</th>
+                                                                            <th scope="col">
+                                                                                <?php
+                                                                                switch ($leaderboard_category) {
+                                                                                    case 'xp':
+                                                                                        echo 'Experience Points';
+                                                                                        break;
+                                                                                    case 'habits':
+                                                                                        echo 'Total Habits';
+                                                                                        break;
+                                                                                    case 'completions':
+                                                                                        echo 'Total Completions';
+                                                                                        break;
+                                                                                    case 'goals':
+                                                                                        echo 'Goals Completed';
+                                                                                        break;
+                                                                                }
+                                                                                ?>
+                                                                            </th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <?php foreach ($leaderboard['leaderboard'] as $index => $entry): ?>
+                                                                            <tr <?php echo $entry['id'] == $user->id ? 'class="table-primary"' : ''; ?>>
+                                                                                <th scope="row">
+                                                                                    <?php if ($index < 3): ?>
+                                                                                        <span class="badge bg-<?php echo $index === 0 ? 'warning' : ($index === 1 ? 'secondary' : 'danger'); ?> rounded-pill">
+                                                                                            <?php echo $index + 1; ?>
+                                                                                        </span>
+                                                                                    <?php else: ?>
+                                                                                        <?php echo $index + 1; ?>
+                                                                                    <?php endif; ?>
+                                                                                </th>
+                                                                                <td>
+                                                                                    <a href="community.php?view=profile&id=<?php echo $entry['id']; ?>" class="text-decoration-none">
+                                                                                        <?php echo htmlspecialchars($entry['username']); ?>
+                                                                                        <?php echo $entry['id'] == $user->id ? ' (You)' : ''; ?>
+                                                                                    </a>
+                                                                                </td>
+                                                                                <td>Level <?php echo $entry['level']; ?></td>
+                                                                                <td>
+                                                                                    <strong>
+                                                                                        <?php 
+                                                                                        if ($leaderboard_category === 'xp') {
+                                                                                            echo number_format($entry['score']);
+                                                                                        } else {
+                                                                                            echo $entry['score'];
+                                                                                        }
+                                                                                        ?>
+                                                                                    </strong>
+                                                                                </td>
+                                                                            </tr>
+                                                                        <?php endforeach; ?>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    <?php elseif ($view === 'profile' && !$profile): ?>
+                                        <!-- Profile Not Found -->
+                                        <div class="alert alert-danger">
+                                            <i class="bi bi-exclamation-triangle-fill"></i> User profile not found or you don't have permission to view it.
+                                        </div>
+                                    <?php endif; ?>
+                                </main>
                             </div>
                         </div>
-                    </div>
-                </div>
-                
-            <?php elseif ($view === 'profile' && !$profile): ?>
-                <!-- Profile Not Found -->
-                <div class="alert alert-danger">
-                    <i class="bi bi-exclamation-triangle-fill"></i> User profile not found or you don't have permission to view it.
-                </div>
-            <?php endif; ?>
-        </main>
-    </div>
-</div>
 
-<?php
-// Include footer
-include __DIR__ . '/partials/footer.php';
-?>
+                        <?php
+                        // Include footer
+                        include __DIR__ . '/partials/footer.php';
+                        ?>
