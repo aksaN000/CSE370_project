@@ -454,73 +454,108 @@ body {
     --header-gradient: linear-gradient(to right, #28a745, #5dd879);
 }
 
-/* Animation and Transitions */
-.enable-animations .card,
-.enable-animations .btn,
-.enable-animations .form-control,
-.enable-animations .nav-link {
-    transition: all 0.3s ease;
-}
-
-.enable-animations .habit-card:hover {
-    transform: translateY(-5px);
-}
-
-.enable-animations .achievement-card:hover {
-    transform: translateY(-10px);
-}
-
-.enable-animations .pulse-animation {
-    animation: pulse 1s infinite;
-}
-
-/* Compact Mode */
-.compact-mode main {
-    padding: 0.5rem !important;
-}
-
-.compact-mode .card {
-    margin-bottom: 0.5rem;
-}
-
-.compact-mode .card-body {
-    padding: 0.75rem;
-}
-
-.compact-mode .card-header,
-.compact-mode .card-footer {
-    padding: 0.5rem 0.75rem;
-}
-
-.compact-mode .table td, 
-.compact-mode .table th {
-    padding: 0.4rem;
-}
-
-.compact-mode .form-control {
-    padding: 0.25rem 0.5rem;
-}
-
-.compact-mode .btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-}
-
-.compact-mode h1, .compact-mode .h1 {
-    font-size: 1.75rem;
-}
-
-.compact-mode h2, .compact-mode .h2 {
-    font-size: 1.5rem;
-}
-
-.compact-mode h3, .compact-mode .h3 {
-    font-size: 1.25rem;
-}
-
-.compact-mode h4, .compact-mode .h4 {
-    font-size: 1.125rem;
-}
+.card, .btn, .form-control, .nav-link, .modal {
+    transition: none;
+  }
+  
+  /* Enhanced animations when enabled */
+  .enable-animations .card,
+  .enable-animations .btn,
+  .enable-animations .form-control,
+  .enable-animations .nav-link,
+  .enable-animations .modal,
+  .enable-animations .dropdown-menu,
+  .enable-animations .alert {
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .enable-animations .habit-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  .enable-animations .achievement-card:hover {
+      transform: translateY(-12px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  }
+  
+  .enable-animations .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .enable-animations .navbar {
+      transition: background-color 0.5s ease;
+  }
+  
+  .enable-animations .pulse-animation {
+      animation: pulse 1.5s infinite;
+  }
+  
+  /* Fade-in animation for page elements */
+  .enable-animations .card,
+  .enable-animations .welcome-section {
+      animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+      from {
+          opacity: 0;
+          transform: translateY(20px);
+      }
+      to {
+          opacity: 1;
+          transform: translateY(0);
+      }
+  }
+  
+  /* Enhanced pulse animation */
+  @keyframes pulse {
+      0% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(var(--primary-color), 0.4);
+      }
+      70% {
+          transform: scale(1.1);
+          box-shadow: 0 0 0 10px rgba(var(--primary-color), 0);
+      }
+      100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(var(--primary-color), 0);
+      }
+  }
+  
+  /* Tab content transitions */
+  .enable-animations .tab-pane {
+      transition: all 0.3s ease-in-out;
+  }
+  
+  .enable-animations .tab-pane.fade:not(.show) {
+      transform: translateY(10px);
+      opacity: 0;
+  }
+  
+  .enable-animations .tab-pane.fade.show {
+      transform: translateY(0);
+      opacity: 1;
+  }
+  
+  /* Modal animations */
+  .enable-animations .modal.fade .modal-dialog {
+      transition: transform 0.3s ease-out;
+      transform: translateY(-50px);
+  }
+  
+  .enable-animations .modal.show .modal-dialog {
+      transform: translateY(0);
+  }
+  
+  /* Form control focus animation */
+  .enable-animations .form-control:focus,
+  .enable-animations .form-select:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+  }
 
 /* Theme support for sidebar */
 .sidebar.bg-dark {

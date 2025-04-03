@@ -3,6 +3,16 @@
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../utils/helpers.php';
+
+
+
+
+
+
+
+
+
 
 class SettingsController {
     private $conn;
@@ -243,78 +253,88 @@ class SettingsController {
         $analytics_consent,
         $additional_settings = []
     ) {
-        // Check if settings exist
+        // Check if settings exist for this user
         $settings = $this->getUserSettings($user_id);
         
-        // Get additional privacy settings
+        // Get additional privacy settings with defaults
         $profile_visibility = $additional_settings['profile_visibility'] ?? 'private';
-        $show_habits = isset($additional_settings['show_habits']) ? 1 : 0;
-        $show_goals = isset($additional_settings['show_goals']) ? 1 : 0;
-        $show_challenges = isset($additional_settings['show_challenges']) ? 1 : 0;
-        $allow_challenge_invites = isset($additional_settings['allow_challenge_invites']) ? 1 : 0;
-        $show_in_leaderboards = isset($additional_settings['show_in_leaderboards']) ? 1 : 0;
-        $allow_friend_requests = isset($additional_settings['allow_friend_requests']) ? 1 : 0;
-        $feature_improvement_consent = isset($additional_settings['feature_improvement_consent']) ? 1 : 0;
-        $data_sharing = isset($additional_settings['data_sharing']) ? 1 : 0;
+        $show_habits = isset($additional_settings['show_habits']) ? (int)$additional_settings['show_habits'] : 0;
+        $show_goals = isset($additional_settings['show_goals']) ? (int)$additional_settings['show_goals'] : 0;
+        $show_challenges = isset($additional_settings['show_challenges']) ? (int)$additional_settings['show_challenges'] : 1;
+        $allow_challenge_invites = isset($additional_settings['allow_challenge_invites']) ? (int)$additional_settings['allow_challenge_invites'] : 1;
+        $show_in_leaderboards = isset($additional_settings['show_in_leaderboards']) ? (int)$additional_settings['show_in_leaderboards'] : 1;
+        $allow_friend_requests = isset($additional_settings['allow_friend_requests']) ? (int)$additional_settings['allow_friend_requests'] : 1;
+        $feature_improvement_consent = isset($additional_settings['feature_improvement_consent']) ? (int)$additional_settings['feature_improvement_consent'] : 0;
+        $data_sharing = isset($additional_settings['data_sharing']) ? (int)$additional_settings['data_sharing'] : 0;
         
-        if(isset($settings['user_id'])) {
-            // Update existing settings
-            $query = "UPDATE " . $this->settings_table . " SET 
-                public_profile = :public_profile,
-                profile_visibility = :profile_visibility,
-                show_stats = :show_stats,
-                show_achievements = :show_achievements,
-                show_habits = :show_habits,
-                show_goals = :show_goals,
-                show_challenges = :show_challenges,
-                allow_challenge_invites = :allow_challenge_invites,
-                show_in_leaderboards = :show_in_leaderboards,
-                allow_friend_requests = :allow_friend_requests,
-                analytics_consent = :analytics_consent,
-                feature_improvement_consent = :feature_improvement_consent,
-                data_sharing = :data_sharing,
-                updated_at = NOW()
-            WHERE user_id = :user_id";
-        } else {
-            // Create new settings
-            $query = "INSERT INTO " . $this->settings_table . " (
-                user_id, public_profile, profile_visibility, 
-                show_stats, show_achievements, show_habits, show_goals, show_challenges,
-                allow_challenge_invites, show_in_leaderboards, allow_friend_requests, 
-                analytics_consent, feature_improvement_consent, data_sharing, updated_at
-            ) VALUES (
-                :user_id, :public_profile, :profile_visibility, 
-                :show_stats, :show_achievements, :show_habits, :show_goals, :show_challenges,
-                :allow_challenge_invites, :show_in_leaderboards, :allow_friend_requests,
-                :analytics_consent, :feature_improvement_consent, :data_sharing, NOW()
-            )";
-        }
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':user_id', $user_id);
-        $stmt->bindParam(':public_profile', $public_profile);
-        $stmt->bindParam(':profile_visibility', $profile_visibility);
-        $stmt->bindParam(':show_stats', $show_stats);
-        $stmt->bindParam(':show_achievements', $show_achievements);
-        $stmt->bindParam(':show_habits', $show_habits);
-        $stmt->bindParam(':show_goals', $show_goals);
-        $stmt->bindParam(':show_challenges', $show_challenges);
-        $stmt->bindParam(':allow_challenge_invites', $allow_challenge_invites);
-        $stmt->bindParam(':show_in_leaderboards', $show_in_leaderboards);
-        $stmt->bindParam(':allow_friend_requests', $allow_friend_requests);
-        $stmt->bindParam(':analytics_consent', $analytics_consent);
-        $stmt->bindParam(':feature_improvement_consent', $feature_improvement_consent);
-        $stmt->bindParam(':data_sharing', $data_sharing);
-        
-        if($stmt->execute()) {
-            return [
-                'success' => true,
-                'message' => 'Privacy settings updated successfully'
-            ];
-        } else {
+        try {
+            if(isset($settings['user_id'])) {
+                // Update existing settings
+                $query = "UPDATE " . $this->settings_table . " SET 
+                    public_profile = :public_profile,
+                    profile_visibility = :profile_visibility,
+                    show_stats = :show_stats,
+                    show_achievements = :show_achievements,
+                    show_habits = :show_habits,
+                    show_goals = :show_goals,
+                    show_challenges = :show_challenges,
+                    allow_challenge_invites = :allow_challenge_invites,
+                    show_in_leaderboards = :show_in_leaderboards,
+                    allow_friend_requests = :allow_friend_requests,
+                    analytics_consent = :analytics_consent,
+                    feature_improvement_consent = :feature_improvement_consent,
+                    data_sharing = :data_sharing,
+                    updated_at = NOW()
+                WHERE user_id = :user_id";
+            } else {
+                // Create new settings
+                $query = "INSERT INTO " . $this->settings_table . " (
+                    user_id, public_profile, profile_visibility, 
+                    show_stats, show_achievements, show_habits, show_goals, show_challenges,
+                    allow_challenge_invites, show_in_leaderboards, allow_friend_requests, 
+                    analytics_consent, feature_improvement_consent, data_sharing, created_at, updated_at
+                ) VALUES (
+                    :user_id, :public_profile, :profile_visibility, 
+                    :show_stats, :show_achievements, :show_habits, :show_goals, :show_challenges,
+                    :allow_challenge_invites, :show_in_leaderboards, :allow_friend_requests,
+                    :analytics_consent, :feature_improvement_consent, :data_sharing, NOW(), NOW()
+                )";
+            }
+            
+            $stmt = $this->conn->prepare($query);
+            
+            // Bind all parameters
+            $stmt->bindParam(':user_id', $user_id);
+            $stmt->bindParam(':public_profile', $public_profile, PDO::PARAM_INT);
+            $stmt->bindParam(':profile_visibility', $profile_visibility);
+            $stmt->bindParam(':show_stats', $show_stats, PDO::PARAM_INT);
+            $stmt->bindParam(':show_achievements', $show_achievements, PDO::PARAM_INT);
+            $stmt->bindParam(':show_habits', $show_habits, PDO::PARAM_INT);
+            $stmt->bindParam(':show_goals', $show_goals, PDO::PARAM_INT);
+            $stmt->bindParam(':show_challenges', $show_challenges, PDO::PARAM_INT);
+            $stmt->bindParam(':allow_challenge_invites', $allow_challenge_invites, PDO::PARAM_INT);
+            $stmt->bindParam(':show_in_leaderboards', $show_in_leaderboards, PDO::PARAM_INT);
+            $stmt->bindParam(':allow_friend_requests', $allow_friend_requests, PDO::PARAM_INT);
+            $stmt->bindParam(':analytics_consent', $analytics_consent, PDO::PARAM_INT);
+            $stmt->bindParam(':feature_improvement_consent', $feature_improvement_consent, PDO::PARAM_INT);
+            $stmt->bindParam(':data_sharing', $data_sharing, PDO::PARAM_INT);
+            
+            if($stmt->execute()) {
+                return [
+                    'success' => true,
+                    'message' => 'Privacy settings updated successfully'
+                ];
+            } else {
+                $errorInfo = $stmt->errorInfo();
+                return [
+                    'success' => false,
+                    'message' => 'Failed to update privacy settings: ' . $errorInfo[2]
+                ];
+            }
+        } catch (Exception $e) {
             return [
                 'success' => false,
-                'message' => 'Failed to update privacy settings'
+                'message' => 'Error updating privacy settings: ' . $e->getMessage()
             ];
         }
     }

@@ -1,6 +1,6 @@
-<?php
-// views/settings.php - Application settings page
 
+
+<?php
 // Include auth controller
 require_once __DIR__ . '/../controllers/AuthController.php';
 require_once __DIR__ . '/../utils/helpers.php';
@@ -20,6 +20,89 @@ $user = $authController->getLoggedInUser();
 // Initialize settings controller
 $settingsController = new SettingsController();
 
+// Get current user settings
+$userSettings = $settingsController->getUserSettings($user->id);
+// Process privacy settings update
+$privacy_updated = false;
+$privacy_message = '';
+if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_privacy'])) {
+    // For debugging - uncomment if needed
+    /*
+    echo "<pre>";
+    echo "POST data:\n";
+    print_r($_POST);
+    echo "</pre>";
+    */
+    
+    // Get checkbox values - important to default to 0 when not checked
+    $public_profile = isset($_POST['public_profile']) ? 1 : 0;
+    $show_stats = isset($_POST['show_stats']) ? 1 : 0;
+    $show_achievements = isset($_POST['show_achievements']) ? 1 : 0;
+    $show_habits = isset($_POST['show_habits']) ? 1 : 0;
+    $show_goals = isset($_POST['show_goals']) ? 1 : 0;
+    $show_challenges = isset($_POST['show_challenges']) ? 1 : 0;
+    $allow_challenge_invites = isset($_POST['allow_challenge_invites']) ? 1 : 0;
+    $show_in_leaderboards = isset($_POST['show_in_leaderboards']) ? 1 : 0;
+    $allow_friend_requests = isset($_POST['allow_friend_requests']) ? 1 : 0;
+    $analytics_consent = isset($_POST['analytics_consent']) ? 1 : 0;
+    $feature_improvement_consent = isset($_POST['feature_improvement_consent']) ? 1 : 0;
+    $data_sharing = isset($_POST['data_sharing']) ? 1 : 0;
+    
+    // Get the profile visibility setting
+    $profile_visibility = $_POST['profile_visibility'] ?? 'private';
+    
+    // Build additional settings array
+    $additional_settings = [
+        'profile_visibility' => $profile_visibility,
+        'show_habits' => $show_habits,
+        'show_goals' => $show_goals,
+        'show_challenges' => $show_challenges,
+        'allow_challenge_invites' => $allow_challenge_invites,
+        'show_in_leaderboards' => $show_in_leaderboards,
+        'allow_friend_requests' => $allow_friend_requests,
+        'feature_improvement_consent' => $feature_improvement_consent,
+        'data_sharing' => $data_sharing
+    ];
+    
+    try {
+        // Save privacy preferences
+        $result = $settingsController->updatePrivacySettings(
+            $user->id, 
+            $public_profile, 
+            $show_stats, 
+            $show_achievements, 
+            $analytics_consent,
+            $additional_settings
+        );
+        
+        // Process result
+        $privacy_updated = $result['success'];
+        $privacy_message = $result['message'];
+        
+        // Log information for debugging
+        /*
+        error_log('Privacy settings update result: ' . json_encode($result));
+        error_log('Updated settings: ' . json_encode($additional_settings));
+        */
+        
+        // If update was successful, reload user settings
+        if ($privacy_updated) {
+            // Reload user settings to display correct values
+            $userSettings = $settingsController->getUserSettings($user->id);
+            
+            // Add JavaScript to make sure we stay on the privacy tab
+            echo '<script>
+                window.addEventListener("DOMContentLoaded", function() { 
+                    document.getElementById("privacy-tab").click();
+                });
+            </script>';
+        }
+    } catch (Exception $e) {
+        $privacy_updated = false;
+        $privacy_message = "Error updating privacy settings: " . $e->getMessage();
+        error_log('Privacy settings error: ' . $e->getMessage());
+    }
+}
 // Process theme settings update
 $theme_updated = false;
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_theme'])) {
@@ -78,23 +161,57 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_notifications']
 
 // Process privacy settings update
 $privacy_updated = false;
+$privacy_message = '';
 if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_privacy'])) {
+    // Get form values with proper fallbacks
     $public_profile = isset($_POST['public_profile']) ? 1 : 0;
     $show_stats = isset($_POST['show_stats']) ? 1 : 0;
     $show_achievements = isset($_POST['show_achievements']) ? 1 : 0;
     $analytics_consent = isset($_POST['analytics_consent']) ? 1 : 0;
     
-    // Save privacy preferences
-    $result = $settingsController->updatePrivacySettings(
-        $user->id, 
-        $public_profile, 
-        $show_stats, 
-        $show_achievements, 
-        $analytics_consent
-    );
+    // Get additional privacy settings
+    $additional_settings = [
+        'profile_visibility' => $_POST['profile_visibility'] ?? 'private',
+        'show_habits' => isset($_POST['show_habits']) ? 1 : 0,
+        'show_goals' => isset($_POST['show_goals']) ? 1 : 0,
+        'show_challenges' => isset($_POST['show_challenges']) ? 1 : 0,
+        'allow_challenge_invites' => isset($_POST['allow_challenge_invites']) ? 1 : 0,
+        'show_in_leaderboards' => isset($_POST['show_in_leaderboards']) ? 1 : 0,
+        'allow_friend_requests' => isset($_POST['allow_friend_requests']) ? 1 : 0,
+        'feature_improvement_consent' => isset($_POST['feature_improvement_consent']) ? 1 : 0,
+        'data_sharing' => isset($_POST['data_sharing']) ? 1 : 0
+    ];
     
-    $privacy_updated = $result['success'];
-    $privacy_message = $result['message'];
+    try {
+        // Save privacy preferences
+        $result = $settingsController->updatePrivacySettings(
+            $user->id, 
+            $public_profile, 
+            $show_stats, 
+            $show_achievements, 
+            $analytics_consent,
+            $additional_settings
+        );
+        
+        $privacy_updated = $result['success'];
+        $privacy_message = $result['message'];
+        
+        // If update was successful, reload user settings
+        if ($privacy_updated) {
+            // Reload user settings
+            $userSettings = $settingsController->getUserSettings($user->id);
+            
+            // Add JavaScript to ensure we stay on the privacy tab
+            echo '<script>
+                window.addEventListener("DOMContentLoaded", function() { 
+                    document.getElementById("privacy-tab").click();
+                });
+            </script>';
+        }
+    } catch (Exception $e) {
+        $privacy_updated = false;
+        $privacy_message = "Error updating privacy settings: " . $e->getMessage();
+    }
 }
 
 // Process data export
@@ -617,19 +734,20 @@ include '../views/partials/header.php';
                 
                 <!-- Privacy Tab -->
                 <div class="tab-pane fade" id="privacy" role="tabpanel" aria-labelledby="privacy-tab">
-                        <?php if(isset($privacy_updated)): ?>
-                            <div class="alert alert-<?php echo $privacy_updated ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
-                                <?php echo $privacy_message ?? 'Privacy settings updated successfully!'; ?>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h5 class="mb-0">Profile Privacy Settings</h5>
-                            </div>
-                            <div class="card-body">
-                            <form action="../controllers/process_update_privacy.php" method="POST" id="privacyForm">
+                    <!-- Alert messages for privacy settings -->
+                    <?php if(isset($privacy_updated) && $privacy_updated !== null): ?>
+                        <div class="alert alert-<?php echo $privacy_updated ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
+                            <?php echo $privacy_message; ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Profile Privacy Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="settings.php" method="POST" id="privacyForm">
                                 <input type="hidden" name="update_privacy" value="1">
                                 
                                 <div class="mb-3">
@@ -644,7 +762,7 @@ include '../views/partials/header.php';
                                 </div>
                                 
                                 <div class="mb-3 form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="publicProfile" name="public_profile" <?php echo $userSettings['public_profile'] ? 'checked' : ''; ?>>
+                                    <input class="form-check-input" type="checkbox" role="switch" id="publicProfile" name="public_profile" <?php echo ($userSettings['public_profile'] ?? 0) ? 'checked' : ''; ?>>
                                     <label class="form-check-label" for="publicProfile">Legacy Public Profile Setting</label>
                                     <div class="form-text">This setting is maintained for compatibility. Use the Profile Visibility setting above for more control.</div>
                                 </div>
@@ -655,13 +773,13 @@ include '../views/partials/header.php';
                                 <p class="text-muted mb-3">Choose what information is visible to others when your profile is viewable:</p>
                                 
                                 <div class="mb-3 form-check form-switch">
-                                    <input class="form-check-input profile-dependent" type="checkbox" role="switch" id="showStats" name="show_stats" <?php echo $userSettings['show_stats'] ? 'checked' : ''; ?> <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'disabled' : ''; ?>>
+                                    <input class="form-check-input profile-dependent" type="checkbox" role="switch" id="showStats" name="show_stats" <?php echo ($userSettings['show_stats'] ?? 0) ? 'checked' : ''; ?> <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'disabled' : ''; ?>>
                                     <label class="form-check-label" for="showStats">Show Statistics</label>
                                     <div class="form-text">Display your activity statistics on your profile</div>
                                 </div>
                                 
                                 <div class="mb-3 form-check form-switch">
-                                    <input class="form-check-input profile-dependent" type="checkbox" role="switch" id="showAchievements" name="show_achievements" <?php echo $userSettings['show_achievements'] ? 'checked' : ''; ?> <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'disabled' : ''; ?>>
+                                    <input class="form-check-input profile-dependent" type="checkbox" role="switch" id="showAchievements" name="show_achievements" <?php echo ($userSettings['show_achievements'] ?? 1) ? 'checked' : ''; ?> <?php echo ($userSettings['profile_visibility'] ?? 'private') == 'private' ? 'disabled' : ''; ?>>
                                     <label class="form-check-label" for="showAchievements">Show Achievements</label>
                                     <div class="form-text">Display your badges and achievements on your profile</div>
                                 </div>
@@ -711,7 +829,7 @@ include '../views/partials/header.php';
                                 <h6 class="mb-3">Data & Privacy</h6>
                                 
                                 <div class="mb-3 form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="analyticsConsent" name="analytics_consent" <?php echo $userSettings['analytics_consent'] ? 'checked' : ''; ?>>
+                                    <input class="form-check-input" type="checkbox" role="switch" id="analyticsConsent" name="analytics_consent" <?php echo ($userSettings['analytics_consent'] ?? 1) ? 'checked' : ''; ?>>
                                     <label class="form-check-label" for="analyticsConsent">Usage Analytics</label>
                                     <div class="form-text">Allow collection of anonymous usage data to improve the app</div>
                                 </div>
@@ -746,35 +864,39 @@ include '../views/partials/header.php';
                                     <button type="submit" class="btn btn-primary">Save Privacy Settings</button>
                                 </div>
                             </form>
-                            </div>
-                            <div class="card-footer">
-                                <small class="text-muted">Last updated: <?php echo formatDate($userSettings['updated_at'] ?? date('Y-m-d H:i:s'), 'F j, Y, g:i a'); ?></small>
-                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">Last updated: <?php echo formatDate($userSettings['updated_at'] ?? date('Y-m-d H:i:s'), 'F j, Y, g:i a'); ?></small>
                         </div>
                     </div>
+                </div>
 
-                    <script>
-                    // JavaScript for handling privacy settings
-                    document.addEventListener('DOMContentLoaded', function() {
-                        // Handle profile visibility dependencies
-                        const profileVisibility = document.getElementById('profileVisibility');
-                        const profileDependentInputs = document.querySelectorAll('.profile-dependent');
-                        
-                        if(profileVisibility && profileDependentInputs.length > 0) {
-                            profileVisibility.addEventListener('change', function() {
-                                const isPrivate = this.value === 'private';
-                                profileDependentInputs.forEach(input => {
-                                    input.disabled = isPrivate;
-                                    if(isPrivate) {
-                                        input.checked = false;
-                                    }
-                                });
+                <!-- JavaScript for handling privacy settings -->
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Handle profile visibility dependencies
+                    const profileVisibility = document.getElementById('profileVisibility');
+                    const profileDependentInputs = document.querySelectorAll('.profile-dependent');
+                    const publicProfile = document.getElementById('publicProfile');
+                    
+                    if(profileVisibility && profileDependentInputs.length > 0) {
+                        // Function to update dependent form elements
+                        function updateDependentInputs() {
+                            const isPrivate = profileVisibility.value === 'private';
+                            profileDependentInputs.forEach(input => {
+                                input.disabled = isPrivate;
+                                // Don't reset values, just disable inputs
                             });
                         }
                         
-                        // Sync the legacy public profile setting with the new visibility dropdown
-                        const publicProfile = document.getElementById('publicProfile');
-                        if(profileVisibility && publicProfile) {
+                        // Call on load
+                        updateDependentInputs();
+                        
+                        // Add event listener
+                        profileVisibility.addEventListener('change', updateDependentInputs);
+                        
+                        // Sync with legacy public profile setting
+                        if(publicProfile) {
                             // When profile visibility changes, update the public profile checkbox
                             profileVisibility.addEventListener('change', function() {
                                 publicProfile.checked = this.value !== 'private';
@@ -785,18 +907,34 @@ include '../views/partials/header.php';
                                 if(this.checked) {
                                     if(profileVisibility.value === 'private') {
                                         profileVisibility.value = 'public';
-                                        // Trigger the change event to update dependent inputs
+                                        // Trigger change event
                                         profileVisibility.dispatchEvent(new Event('change'));
                                     }
                                 } else {
                                     profileVisibility.value = 'private';
-                                    // Trigger the change event to update dependent inputs
+                                    // Trigger change event
                                     profileVisibility.dispatchEvent(new Event('change'));
                                 }
                             });
                         }
-                    });
-                    </script>
+                    }
+                    
+                    // Enable submit button click tracking for debugging
+                    const privacyForm = document.getElementById('privacyForm');
+                    if(privacyForm) {
+                        privacyForm.addEventListener('submit', function(e) {
+                            // You can add console logs here for debugging if needed
+                            console.log('Privacy form submitted');
+                            // Don't prevent default - we want the form to submit normally
+                        });
+                    }
+                    
+                    // Process URL hash for tab switching
+                    if(window.location.hash === '#privacy') {
+                        document.querySelector('#privacy-tab').click();
+                    }
+                });
+                </script>
                 
                 <!-- Data & Backup Tab -->
                 <div class="tab-pane fade" id="data" role="tabpanel" aria-labelledby="data-tab">
@@ -1026,15 +1164,31 @@ include '../views/partials/header.php';
         
         // Apply color scheme on load
         const currentColorScheme = '<?php echo $current_color_scheme; ?>';
-        applyColorScheme(currentColorScheme);
-        
-        // Listen for color scheme changes
-        colorSchemeRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                applyColorScheme(this.value);
+            applyColorScheme(currentColorScheme);
+
+            // Listen for color scheme changes
+            colorSchemeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    applyColorScheme(this.value);
+                });
             });
-        });
-    });
+            const enableAnimationsToggle = document.getElementById('enableAnimations');
+            if(enableAnimationsToggle) {
+                enableAnimationsToggle.addEventListener('change', function() {
+                    if(this.checked) {
+                        document.body.classList.add('enable-animations');
+                    } else {
+                        document.body.classList.remove('enable-animations');
+                    }
+                });
+                
+                // Initialize animations state on page load
+                if(enableAnimationsToggle.checked) {
+                    document.body.classList.add('enable-animations');
+                } else {
+                    document.body.classList.remove('enable-animations');
+                }
+            }
 </script>
 
 <?php
