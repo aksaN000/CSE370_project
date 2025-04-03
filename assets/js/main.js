@@ -106,6 +106,79 @@ document.addEventListener('DOMContentLoaded', function() {
     if (taskContainer) {
         enableTaskReordering();
     }
+    
+    // Theme switching logic
+    const themeRadios = document.querySelectorAll('input[name="theme"]');
+    const htmlElement = document.documentElement;
+    
+    function applyTheme(theme) {
+        const htmlElement = document.documentElement;
+        const body = document.body;
+    
+        if(theme === 'dark') {
+            htmlElement.setAttribute('data-bs-theme', 'dark');
+            body.classList.add('dark-theme');
+            localStorage.setItem('habit-tracker-theme', 'dark');
+        } else if(theme === 'light') {
+            htmlElement.removeAttribute('data-bs-theme');
+            body.classList.remove('dark-theme');
+            localStorage.setItem('habit-tracker-theme', 'light');
+        } else if(theme === 'system') {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (prefersDark) {
+                htmlElement.setAttribute('data-bs-theme', 'dark');
+                body.classList.add('dark-theme');
+            } else {
+                htmlElement.removeAttribute('data-bs-theme');
+                body.classList.remove('dark-theme');
+            }
+            
+            localStorage.setItem('habit-tracker-theme', 'system');
+        }
+    
+        // Persist theme choice
+        localStorage.setItem('habit-tracker-theme', theme);
+    }
+    
+    // On page load, apply the stored or system theme
+    document.addEventListener('DOMContentLoaded', function() {
+        const storedTheme = localStorage.getItem('habit-tracker-theme') || 'light';
+        const themeRadios = document.querySelectorAll('input[name="theme"]');
+        
+        // Set the correct radio button
+        themeRadios.forEach(radio => {
+            if (radio.value === storedTheme) {
+                radio.checked = true;
+            }
+        });
+    
+        applyTheme(storedTheme);
+    
+        // Listen for system theme changes if using system theme
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (storedTheme === 'system') {
+                applyTheme('system');
+            }
+        });
+    });
+    // Apply theme on page load
+    const currentTheme = '<?php echo $current_theme; ?>';
+    applyTheme(currentTheme);
+    
+    // Listen for theme changes
+    themeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            applyTheme(this.value);
+        });
+    });
+    
+    // Listen for system theme changes if using system theme
+    if(currentTheme === 'system') {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            applyTheme('system');
+        });
+    }
 });
 
 /**

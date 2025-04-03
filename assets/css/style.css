@@ -335,34 +335,6 @@ body {
     --modal-bg: #fff;
 }
 
-/* Dark Theme */
-[data-bs-theme="dark"] {
-    --primary-color: #0d6efd;
-    --secondary-color: #6c757d;
-    --success-color: #198754;
-    --danger-color: #dc3545;
-    --warning-color: #ffc107;
-    --info-color: #0dcaf0;
-    --light-color: #f8f9fa;
-    --dark-color: #212529;
-    
-    --body-bg: #212529;
-    --body-color: #f8f9fa;
-    --card-bg: #2c3034;
-    --card-border: rgba(255, 255, 255, 0.125);
-    --card-shadow: 0 .125rem .25rem rgba(0, 0, 0, .5);
-    --header-bg: #2c3034;
-    --header-gradient: linear-gradient(to right, #1a1d20, #2c3034);
-    --sidebar-bg: #2c3034;
-    --sidebar-active: rgba(255, 255, 255, 0.1);
-    --sidebar-hover: rgba(255, 255, 255, 0.05);
-    --navbar-bg: #212529;
-    --navbar-color: #fff;
-    --input-bg: #2c3034;
-    --input-border: #495057;
-    --modal-bg: #2c3034;
-}
-
 /* Apply theme variables */
 body {
     background-color: var(--body-bg);
@@ -618,117 +590,122 @@ body {
     border-left-color: #28a745;
 }
 
-/* Custom theme implementation */
-body[data-custom-theme="dark"] {
-    background-color: #212529;
-    color: #f8f9fa;
+/* Dark Theme */
+[data-bs-theme="dark"] {
+    /* Color Palette */
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    
+    /* Global Dark Theme Variables */
+    --body-bg: #212529;
+    --body-color: #f8f9fa;
+    --text-muted: rgba(255,255,255,0.6);
+    
+    /* Component Specific Dark Themes */
+    --card-bg: #2c3034;
+    --card-border: rgba(255,255,255,0.125);
+    --card-text: #f8f9fa;
+    
+    --input-bg: #2c3034;
+    --input-border: #495057;
+    --input-color: #f8f9fa;
+    
+    --navbar-bg: #212529;
+    --navbar-color: #ffffff;
+    
+    --modal-bg: #2c3034;
+    --modal-text: #f8f9fa;
 }
 
-body[data-custom-theme="dark"] .sidebar {
-    background-color: #343a40 !important;
+/* Full Body and Root Dark Mode Styles */
+[data-bs-theme="dark"] {
+    background-color: var(--body-bg);
+    color: var(--body-color);
 }
 
-body[data-custom-theme="dark"] .sidebar .nav-link {
-    color: rgba(255, 255, 255, 0.8);
+[data-bs-theme="dark"] body {
+    background-color: var(--body-bg) !important;
+    color: var(--body-color) !important;
 }
 
-body[data-custom-theme="dark"] .sidebar .nav-link:hover {
-    color: #fff;
-    background-color: rgba(255, 255, 255, 0.1);
+/* Ensure key components respect dark mode */
+[data-bs-theme="dark"] .card {
+    background-color: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+    color: var(--card-text) !important;
 }
 
-body[data-custom-theme="dark"] .sidebar .nav-link.active {
-    color: #fff;
-    background-color: rgba(255, 255, 255, 0.2);
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+    background-color: var(--input-bg) !important;
+    border-color: var(--input-border) !important;
+    color: var(--input-color) !important;
 }
 
-body[data-custom-theme="dark"] .text-muted {
-    color: rgba(255, 255, 255, 0.6) !important;
-}
-/* Dark mode improvements for profile page stats cards */
-[data-bs-theme="dark"] .profile-stats .card {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
+[data-bs-theme="dark"] .text-muted {
+    color: var(--text-muted) !important;
 }
 
-[data-bs-theme="dark"] .profile-stats .card-body {
-    color: rgba(255, 255, 255, 0.8);
+[data-bs-theme="dark"] .modal-content {
+    background-color: var(--modal-bg) !important;
+    color: var(--modal-text) !important;
 }
 
-[data-bs-theme="dark"] .profile-stats .card-body h4 {
-    color: rgba(255, 255, 255, 0.9);
+[data-bs-theme="dark"] .alert {
+    background-color: rgba(255,255,255,0.1) !important;
+    color: var(--body-color) !important;
+    border-color: rgba(255,255,255,0.2) !important;
 }
 
-[data-bs-theme="dark"] .profile-stats .card-body small {
-    color: rgba(255, 255, 255, 0.6);
+/* Navbar and Navigation */
+[data-bs-theme="dark"] .navbar {
+    background-color: var(--navbar-bg) !important;
+    color: var(--navbar-color) !important;
 }
 
-/* Improve visibility of background-light cards in dark mode */
+[data-bs-theme="dark"] .nav-link {
+    color: rgba(255,255,255,0.7) !important;
+}
+
+[data-bs-theme="dark"] .nav-link:hover {
+    color: rgba(255,255,255,0.9) !important;
+}
+
+/* Specific Dark Mode Enhancements */
 [data-bs-theme="dark"] .bg-light {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    color: rgba(255, 255, 255, 0.8) !important;
+    background-color: rgba(255,255,255,0.1) !important;
+    color: var(--body-color) !important;
 }
 
-/* Enhance contrast for statistics cards */
-[data-bs-theme="dark"] .profile-stats .bg-primary,
-[data-bs-theme="dark"] .profile-stats .bg-warning,
-[data-bs-theme="dark"] .profile-stats .bg-success {
-    background-color: rgba(var(--bs-primary-rgb), 0.2) !important;
-    border: 1px solid rgba(var(--bs-primary-rgb), 0.3);
+[data-bs-theme="dark"] .table {
+    color: var(--body-color);
+    background-color: var(--body-bg);
 }
 
-[data-bs-theme="dark"] .profile-stats .bg-primary h4,
-[data-bs-theme="dark"] .profile-stats .bg-warning h4,
-[data-bs-theme="dark"] .profile-stats .bg-success h4 {
-    color: rgba(255, 255, 255, 0.9);
+[data-bs-theme="dark"] .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255,255,255,0.05);
 }
 
-/* Improve badge visibility in dark mode */
-[data-bs-theme="dark"] .level-badge {
-    background-color: rgba(255, 193, 7, 0.2) !important;
-    color: rgba(255, 193, 7, 0.9) !important;
-    border: 1px solid rgba(255, 193, 7, 0.3);
+[data-bs-theme="dark"] .progress {
+    background-color: rgba(255,255,255,0.1);
+}
+body {
+    background-color: var(--body-bg);
+    color: var(--body-color);
 }
 
-/* Enhance XP progress bar in dark mode */
-[data-bs-theme="dark"] .xp-progress {
-    background-color: rgba(255, 255, 255, 0.1);
+.card {
+    background-color: var(--card-bg);
+    border-color: var(--card-border);
+    box-shadow: var(--card-shadow);
 }
 
-[data-bs-theme="dark"] .xp-progress .progress-bar {
-    background-color: rgba(255, 193, 7, 0.7);
-}
-
-/* Make sure text is readable in dark mode */
-[data-bs-theme="dark"] .profile-header {
-    background-color: rgba(78, 84, 200, 0.2) !important;
-    background-image: linear-gradient(to right, rgba(78, 84, 200, 0.2), rgba(143, 148, 251, 0.2)) !important;
-}
-
-[data-bs-theme="dark"] .profile-header h1,
-[data-bs-theme="dark"] .profile-header .lead {
-    color: rgba(255, 255, 255, 0.9);
-}
-/* Disable animations when not enabled */
-body:not(.enable-animations) * {
-    animation: none !important;
-    transition: none !important;
-}
-
-/* Base animations */
-.enable-animations * {
-    transition: all 0.3s ease-in-out;
-}
-
-/* Enhanced animations for specific elements */
-.enable-animations .card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.enable-animations .btn {
-    transition: transform 0.2s ease, background-color 0.3s ease;
-}
-
-.enable-animations .nav-link {
-    transition: color 0.3s ease, background-color 0.3s ease;
+.navbar-dark {
+    background-color: var(--navbar-bg) !important;
 }

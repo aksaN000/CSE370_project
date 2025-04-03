@@ -70,21 +70,27 @@ $themeClasses[] = $enable_animations ? 'enable-animations' : '';
     <link rel="shortcut icon" href="<?php echo strpos($_SERVER['PHP_SELF'], '/views/') !== false ? '../' : ''; ?>assets/images/favicon.png" type="image/png">
     
     <script>
-        // Set initial theme before page load to prevent flashing
-        (function() {
-            let storedTheme = localStorage.getItem('habit-tracker-theme') || '<?php echo $current_theme; ?>';
-            
-            if(storedTheme === 'dark') {
+    <script>
+    // Set initial theme before page load to prevent flashing
+    (function() {
+        const storedTheme = localStorage.getItem('habit-tracker-theme') || '<?php echo $current_theme; ?>';
+        
+        if(storedTheme === 'dark') {
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+            document.body.classList.add('dark-theme');
+        } else if(storedTheme === 'light') {
+            document.documentElement.removeAttribute('data-bs-theme');
+            document.body.classList.remove('dark-theme');
+        } else if(storedTheme === 'system') {
+            // Check system preference
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
                 document.documentElement.setAttribute('data-bs-theme', 'dark');
-            } else if(storedTheme === 'light') {
-                document.documentElement.setAttribute('data-bs-theme', 'light');
-            } else if(storedTheme === 'system') {
-                // Check system preference
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                document.documentElement.setAttribute('data-bs-theme', prefersDark ? 'dark' : 'light');
+                document.body.classList.add('dark-theme');
             }
-        })();
-    </script>
+        }
+    })();
+</script>
 </head>
 <body class="<?php 
     // Combine all theme classes
