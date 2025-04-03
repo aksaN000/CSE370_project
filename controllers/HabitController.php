@@ -4,18 +4,20 @@
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../models/Habit.php';
 require_once __DIR__ . '/../utils/XPSystem.php';
-
+require_once __DIR__ . '/../utils/NotificationHelper.php';
 
 class HabitController {
     private $conn;
     private $habit;
     private $xpSystem;
+    private $notificationHelper;
     
     public function __construct() {
         global $conn;
         $this->conn = $conn;
         $this->habit = new Habit($conn);
         $this->xpSystem = new XPSystem($conn);
+        $this->notificationHelper = new NotificationHelper($conn);
     }
     
     // Get all habits for a user
@@ -43,6 +45,7 @@ class HabitController {
         
         return $result['total'] ?? 0;
     }
+    
     // Add a new habit
     public function addHabit($habit_data) {
         // Set the habit properties
@@ -93,6 +96,16 @@ class HabitController {
         if($this->habit->markAsComplete()) {
             // Award XP to the user
             $xp_result = $this->xpSystem->awardXP($user_id, $this->habit->xp_reward, 'habit', 'Completed habit: ' . $this->habit->title);
+            
+            // Create habit-specific notification
+            $notification_data = [
+                'user_id' => $user_id,
+                'type' => 'habit',
+                'title' => 'Habit Completed',
+                'message' => "You completed the habit: {$this->habit->title}"
+            ];
+            
+            $this->notificationHelper->createNotificationIfEnabled($notification_data);
             
             return [
                 'success' => true,
@@ -163,6 +176,7 @@ class HabitController {
         // Get statistics
         return $this->habit->getStatistics();
     }
+    
     // Check if a habit is active today
     public function isActiveToday($habit_id) {
         // Get the habit details
@@ -324,7 +338,6 @@ class HabitController {
     }
 
     // Get the longest streak for a user (across all habits)
-    // Get the longest habit streak
     public function getLongestStreak($user_id) {
         $query = "SELECT h.id, h.title, 
                 (SELECT COUNT(*) FROM habit_completions hc WHERE hc.habit_id = h.id) as completion_count
@@ -404,6 +417,15 @@ class HabitController {
             if ($frequency_value !== null) {
                 $this->habit->frequency_value = $frequency_value;
             }
+        }
+        
+        // Update optional date ranges if provided
+        if (isset($habit_data['start_date'])) {
+            $this->habit->start_date = $habit_data['start_date'];
+        }
+        
+        if (isset($habit_data['end_date'])) {
+            $this->habit->end_date = $habit_data['end_date'];
         }
         
         // Update the habit

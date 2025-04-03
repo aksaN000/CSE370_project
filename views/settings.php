@@ -448,289 +448,122 @@ include '../views/partials/header.php';
                     </div>
                 </div>
                 
+
                 <!-- Notifications Tab -->
+                 
                 <div class="tab-pane fade" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
-                        <?php if(isset($notification_updated)): ?>
-                            <div class="alert alert-<?php echo $notification_updated ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
-                                <?php echo $notification_message ?? 'Notification settings updated successfully!'; ?>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h5 class="mb-0">In-App Notification Preferences</h5>
-                            </div>
-                            <div class="card-body">
-                                <form action="settings.php" method="POST" id="notificationForm">
-                                    <input type="hidden" name="update_notifications" value="1">
-                                    
-                                    <h6 class="mb-3">Notification Types</h6>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="habitReminders" name="habit_reminders" <?php echo $userSettings['habit_reminders'] ? 'checked' : ''; ?>>
-                                        <label class="form-check-label" for="habitReminders">Daily Habit Reminders</label>
-                                        <div class="form-text">Receive reminders for incomplete habits</div>
+                    <?php if(isset($notification_updated)): ?>
+                        <div class="alert alert-<?php echo $notification_updated ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
+                            <?php echo $notification_message ?? 'Notification settings updated successfully!'; ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Notification Preferences</h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="settings.php" method="POST" id="notificationForm">
+                                <input type="hidden" name="update_notifications" value="1">
+                                <!-- Include all necessary hidden fields to ensure compatibility with the controller -->
+                                <input type="hidden" name="habit_reminder_time" value="<?php echo $userSettings['habit_reminder_time'] ?? 'morning'; ?>">
+                                <input type="hidden" name="notification_sound" value="<?php echo $userSettings['notification_sound'] ?? 'default'; ?>">
+                                <input type="hidden" name="notification_duration" value="<?php echo $userSettings['notification_duration'] ?? 'medium'; ?>">
+                                <input type="hidden" name="email_time" value="<?php echo $userSettings['email_time'] ?? 'morning'; ?>">
+                                
+                                <h6 class="mb-3">App Notifications</h6>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="habitReminders" name="habit_reminders" <?php echo $userSettings['habit_reminders'] ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="habitReminders">Habit Reminders</label>
+                                    <div class="form-text">Receive reminders for habits due today</div>
+                                </div>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="goalUpdates" name="goal_updates" <?php echo $userSettings['goal_updates'] ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="goalUpdates">Goal Updates</label>
+                                    <div class="form-text">Get notified about upcoming goal deadlines and milestones</div>
+                                </div>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="challengeNotifications" name="challenge_notifications" <?php echo $userSettings['challenge_notifications'] ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="challengeNotifications">Challenge Notifications</label>
+                                    <div class="form-text">Receive updates about challenges you're participating in</div>
+                                </div>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="levelUpNotifications" name="level_up_notifications" <?php echo $userSettings['level_up_notifications'] ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="levelUpNotifications">Achievement Notifications</label>
+                                    <div class="form-text">Get notified when you level up or earn badges</div>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                                <h6 class="mb-3">Email Notifications</h6>
+                                
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="emailNotifications" name="email_notifications" <?php echo $userSettings['email_notifications'] ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="emailNotifications">Email Notifications</label>
+                                    <div class="form-text">Receive notifications by email</div>
+                                </div>
+                                
+                                <div class="mb-3 ps-4 <?php echo !$userSettings['email_notifications'] ? 'opacity-50' : ''; ?>" id="emailNotificationOptions">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="emailDaily" name="email_daily" <?php echo $userSettings['email_daily'] ? 'checked' : ''; ?> <?php echo !$userSettings['email_notifications'] ? 'disabled' : ''; ?>>
+                                        <label class="form-check-label" for="emailDaily">
+                                            Daily Digest
+                                        </label>
+                                        <div class="form-text">Receive a summary of your day's activity</div>
                                     </div>
-                                    
-                                    <div class="collapse mb-3" id="habitReminderOptions">
-                                        <div class="card card-body bg-light border-0">
-                                            <div class="mb-3">
-                                                <label class="form-label">Reminder Time</label>
-                                                <select class="form-select" name="habit_reminder_time">
-                                                    <option value="morning" <?php echo ($userSettings['habit_reminder_time'] ?? 'morning') == 'morning' ? 'selected' : ''; ?>>Morning (8:00 AM)</option>
-                                                    <option value="afternoon" <?php echo ($userSettings['habit_reminder_time'] ?? 'morning') == 'afternoon' ? 'selected' : ''; ?>>Afternoon (2:00 PM)</option>
-                                                    <option value="evening" <?php echo ($userSettings['habit_reminder_time'] ?? 'morning') == 'evening' ? 'selected' : ''; ?>>Evening (7:00 PM)</option>
-                                                    <option value="custom" <?php echo ($userSettings['habit_reminder_time'] ?? 'morning') == 'custom' ? 'selected' : ''; ?>>Custom Time</option>
-                                                </select>
-                                            </div>
-                                            
-                                            <div class="mb-3" id="customTimeGroup" style="display: <?php echo ($userSettings['habit_reminder_time'] ?? 'morning') == 'custom' ? 'block' : 'none'; ?>;">
-                                                <label class="form-label">Custom Reminder Time</label>
-                                                <input type="time" class="form-control" name="habit_reminder_custom_time" value="<?php echo $userSettings['habit_reminder_custom_time'] ?? '08:00'; ?>">
-                                            </div>
-                                        </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="emailWeekly" name="email_weekly" <?php echo $userSettings['email_weekly'] ? 'checked' : ''; ?> <?php echo !$userSettings['email_notifications'] ? 'disabled' : ''; ?>>
+                                        <label class="form-check-label" for="emailWeekly">
+                                            Weekly Summary
+                                        </label>
+                                        <div class="form-text">Receive a weekly progress report</div>
                                     </div>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="goalUpdates" name="goal_updates" <?php echo $userSettings['goal_updates'] ? 'checked' : ''; ?>>
-                                        <label class="form-check-label" for="goalUpdates">Goal Updates</label>
-                                        <div class="form-text">Get updates about upcoming goal deadlines</div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="emailReminders" name="email_reminders" <?php echo $userSettings['email_reminders'] ? 'checked' : ''; ?> <?php echo !$userSettings['email_notifications'] ? 'disabled' : ''; ?>>
+                                        <label class="form-check-label" for="emailReminders">
+                                            Missed Habit Reminders
+                                        </label>
+                                        <div class="form-text">Get emailed about habits you haven't completed</div>
                                     </div>
-                                    
-                                    <div class="collapse mb-3" id="goalUpdateOptions">
-                                        <div class="card card-body bg-light border-0">
-                                            <div class="mb-3">
-                                                <label class="form-label">Notify me when:</label>
-                                                <div class="form-check mb-2">
-                                                    <input class="form-check-input" type="checkbox" id="goalUpdateDeadline" name="goal_update_deadline" <?php echo ($userSettings['goal_update_deadline'] ?? 1) ? 'checked' : ''; ?>>
-                                                    <label class="form-check-label" for="goalUpdateDeadline">
-                                                        Goal deadline is approaching
-                                                    </label>
-                                                </div>
-                                                <div class="form-check mb-2">
-                                                    <input class="form-check-input" type="checkbox" id="goalUpdateMilestone" name="goal_update_milestone" <?php echo ($userSettings['goal_update_milestone'] ?? 1) ? 'checked' : ''; ?>>
-                                                    <label class="form-check-label" for="goalUpdateMilestone">
-                                                        Goal reaches a milestone (25%, 50%, 75%)
-                                                    </label>
-                                                </div>
-                                                <div class="form-check mb-2">
-                                                    <input class="form-check-input" type="checkbox" id="goalUpdateExpired" name="goal_update_expired" <?php echo ($userSettings['goal_update_expired'] ?? 1) ? 'checked' : ''; ?>>
-                                                    <label class="form-check-label" for="goalUpdateExpired">
-                                                        Goal has expired without completion
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="challengeNotifications" name="challenge_notifications" <?php echo $userSettings['challenge_notifications'] ? 'checked' : ''; ?>>
-                                        <label class="form-check-label" for="challengeNotifications">Challenge Notifications</label>
-                                        <div class="form-text">Receive updates about challenges you've joined</div>
-                                    </div>
-                                    
-                                    <div class="collapse mb-3" id="challengeNotificationOptions">
-                                        <div class="card card-body bg-light border-0">
-                                            <div class="mb-3">
-                                                <label class="form-label">Notify me about:</label>
-                                                <div class="form-check mb-2">
-                                                    <input class="form-check-input" type="checkbox" id="challengeTaskReminders" name="challenge_task_reminders" <?php echo ($userSettings['challenge_task_reminders'] ?? 1) ? 'checked' : ''; ?>>
-                                                    <label class="form-check-label" for="challengeTaskReminders">
-                                                        Incomplete challenge tasks
-                                                    </label>
-                                                </div>
-                                                <div class="form-check mb-2">
-                                                    <input class="form-check-input" type="checkbox" id="challengeNewParticipants" name="challenge_new_participants" <?php echo ($userSettings['challenge_new_participants'] ?? 1) ? 'checked' : ''; ?>>
-                                                    <label class="form-check-label" for="challengeNewParticipants">
-                                                        New challenge participants
-                                                    </label>
-                                                </div>
-                                                <div class="form-check mb-2">
-                                                    <input class="form-check-input" type="checkbox" id="challengeCompletion" name="challenge_completion" <?php echo ($userSettings['challenge_completion'] ?? 1) ? 'checked' : ''; ?>>
-                                                    <label class="form-check-label" for="challengeCompletion">
-                                                        Challenge completion status
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="levelUpNotifications" name="level_up_notifications" <?php echo $userSettings['level_up_notifications'] ? 'checked' : ''; ?>>
-                                        <label class="form-check-label" for="levelUpNotifications">Level Up Notifications</label>
-                                        <div class="form-text">Get notified when you level up</div>
-                                    </div>
-                                    
-                                    <hr class="my-4">
-                                    
-                                    <h6 class="mb-3">Notification Display</h6>
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">Notification Sound</label>
-                                        <select class="form-select" name="notification_sound">
-                                            <option value="default" <?php echo ($userSettings['notification_sound'] ?? 'default') == 'default' ? 'selected' : ''; ?>>Default</option>
-                                            <option value="chime" <?php echo ($userSettings['notification_sound'] ?? 'default') == 'chime' ? 'selected' : ''; ?>>Chime</option>
-                                            <option value="bell" <?php echo ($userSettings['notification_sound'] ?? 'default') == 'bell' ? 'selected' : ''; ?>>Bell</option>
-                                            <option value="success" <?php echo ($userSettings['notification_sound'] ?? 'default') == 'success' ? 'selected' : ''; ?>>Success</option>
-                                            <option value="none" <?php echo ($userSettings['notification_sound'] ?? 'default') == 'none' ? 'selected' : ''; ?>>None (Silent)</option>
-                                        </select>
-                                        <div class="form-text">Choose a sound for in-app notifications</div>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">Notification Display Duration</label>
-                                        <select class="form-select" name="notification_duration">
-                                            <option value="short" <?php echo ($userSettings['notification_duration'] ?? 'medium') == 'short' ? 'selected' : ''; ?>>Short (3 seconds)</option>
-                                            <option value="medium" <?php echo ($userSettings['notification_duration'] ?? 'medium') == 'medium' ? 'selected' : ''; ?>>Medium (5 seconds)</option>
-                                            <option value="long" <?php echo ($userSettings['notification_duration'] ?? 'medium') == 'long' ? 'selected' : ''; ?>>Long (8 seconds)</option>
-                                        </select>
-                                        <div class="form-text">How long notifications stay on screen</div>
-                                    </div>
-                                    
-                                    <hr class="my-4">
-                                    
-                                    <h6 class="mb-3">Email Notifications</h6>
-                                    
-                                    <div class="mb-3 form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="emailNotifications" name="email_notifications" <?php echo $userSettings['email_notifications'] ? 'checked' : ''; ?>>
-                                        <label class="form-check-label" for="emailNotifications">Email Notifications</label>
-                                        <div class="form-text">Receive notifications by email</div>
-                                    </div>
-                                    
-                                    <div class="mb-3 ps-4" id="emailNotificationOptions">
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" id="emailDaily" name="email_daily" <?php echo $userSettings['email_daily'] ? 'checked' : ''; ?> <?php echo !$userSettings['email_notifications'] ? 'disabled' : ''; ?>>
-                                            <label class="form-check-label" for="emailDaily">
-                                                Daily Digest
-                                            </label>
-                                            <div class="form-text">Receive a summary of your day's activity</div>
-                                        </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" id="emailWeekly" name="email_weekly" <?php echo $userSettings['email_weekly'] ? 'checked' : ''; ?> <?php echo !$userSettings['email_notifications'] ? 'disabled' : ''; ?>>
-                                            <label class="form-check-label" for="emailWeekly">
-                                                Weekly Summary
-                                            </label>
-                                            <div class="form-text">Receive a weekly progress report</div>
-                                        </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" id="emailReminders" name="email_reminders" <?php echo $userSettings['email_reminders'] ? 'checked' : ''; ?> <?php echo !$userSettings['email_notifications'] ? 'disabled' : ''; ?>>
-                                            <label class="form-check-label" for="emailReminders">
-                                                Missed Habit Reminders
-                                            </label>
-                                            <div class="form-text">Get emailed about habits you haven't completed</div>
-                                        </div>
-                                        
-                                        <div class="mt-3" id="emailTimeOptions" <?php echo !$userSettings['email_notifications'] ? 'style="display:none;"' : ''; ?>>
-                                            <label class="form-label">Preferred email time</label>
-                                            <select class="form-select" name="email_time" <?php echo !$userSettings['email_notifications'] ? 'disabled' : ''; ?>>
-                                                <option value="morning" <?php echo ($userSettings['email_time'] ?? 'morning') == 'morning' ? 'selected' : ''; ?>>Morning (8:00 AM)</option>
-                                                <option value="afternoon" <?php echo ($userSettings['email_time'] ?? 'morning') == 'afternoon' ? 'selected' : ''; ?>>Afternoon (2:00 PM)</option>
-                                                <option value="evening" <?php echo ($userSettings['email_time'] ?? 'morning') == 'evening' ? 'selected' : ''; ?>>Evening (7:00 PM)</option>
-                                            </select>
-                                            <div class="form-text">When to send email notifications</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="text-end">
-                                        <button type="submit" class="btn btn-primary">Save Notification Settings</button>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="card-footer">
-                                <small class="text-muted">Email notifications will be sent to: <?php echo $user->email; ?></small>
-                            </div>
+                                </div>
+                                
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary">Save Notification Settings</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">Email notifications will be sent to: <?php echo $user->email; ?></small>
                         </div>
                     </div>
+                </div>
 
-                    <script>
-                    // JavaScript for handling notification options
-                    document.addEventListener('DOMContentLoaded', function() {
-                        // Handle habit reminder options
-                        const habitReminders = document.getElementById('habitReminders');
-                        const habitReminderOptions = document.getElementById('habitReminderOptions');
-                        
-                        if(habitReminders && habitReminderOptions) {
-                            habitReminders.addEventListener('change', function() {
-                                if(this.checked) {
-                                    new bootstrap.Collapse(habitReminderOptions).show();
-                                } else {
-                                    new bootstrap.Collapse(habitReminderOptions).hide();
-                                }
+                <script>
+                // JavaScript for handling notification options
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Handle email notification options
+                    const emailToggle = document.getElementById('emailNotifications');
+                    const emailOptions = document.querySelectorAll('#emailDaily, #emailWeekly, #emailReminders');
+                    const emailOptionsContainer = document.getElementById('emailNotificationOptions');
+                    
+                    if(emailToggle && emailOptions.length > 0) {
+                        emailToggle.addEventListener('change', function() {
+                            emailOptions.forEach(option => {
+                                option.disabled = !this.checked;
                             });
                             
-                            // Initialize on page load
-                            if(habitReminders.checked) {
-                                new bootstrap.Collapse(habitReminderOptions).show();
+                            if(emailOptionsContainer) {
+                                emailOptionsContainer.classList.toggle('opacity-50', !this.checked);
                             }
-                        }
-                        
-                        // Handle goal update options
-                        const goalUpdates = document.getElementById('goalUpdates');
-                        const goalUpdateOptions = document.getElementById('goalUpdateOptions');
-                        
-                        if(goalUpdates && goalUpdateOptions) {
-                            goalUpdates.addEventListener('change', function() {
-                                if(this.checked) {
-                                    new bootstrap.Collapse(goalUpdateOptions).show();
-                                } else {
-                                    new bootstrap.Collapse(goalUpdateOptions).hide();
-                                }
-                            });
-                            
-                            // Initialize on page load
-                            if(goalUpdates.checked) {
-                                new bootstrap.Collapse(goalUpdateOptions).show();
-                            }
-                        }
-                        
-                        // Handle challenge notification options
-                        const challengeNotifications = document.getElementById('challengeNotifications');
-                        const challengeNotificationOptions = document.getElementById('challengeNotificationOptions');
-                        
-                        if(challengeNotifications && challengeNotificationOptions) {
-                            challengeNotifications.addEventListener('change', function() {
-                                if(this.checked) {
-                                    new bootstrap.Collapse(challengeNotificationOptions).show();
-                                } else {
-                                    new bootstrap.Collapse(challengeNotificationOptions).hide();
-                                }
-                            });
-                            
-                            // Initialize on page load
-                            if(challengeNotifications.checked) {
-                                new bootstrap.Collapse(challengeNotificationOptions).show();
-                            }
-                        }
-                        
-                        // Handle email notification options
-                        const emailNotifications = document.getElementById('emailNotifications');
-                        const emailOptions = document.querySelectorAll('#emailDaily, #emailWeekly, #emailReminders, select[name="email_time"]');
-                        const emailTimeOptions = document.getElementById('emailTimeOptions');
-                        
-                        if(emailNotifications && emailOptions.length > 0) {
-                            emailNotifications.addEventListener('change', function() {
-                                emailOptions.forEach(option => {
-                                    option.disabled = !this.checked;
-                                });
-                                
-                                if(emailTimeOptions) {
-                                    emailTimeOptions.style.display = this.checked ? 'block' : 'none';
-                                }
-                            });
-                        }
-                        
-                        // Handle custom time option for habit reminders
-                        const habitReminderTime = document.querySelector('select[name="habit_reminder_time"]');
-                        const customTimeGroup = document.getElementById('customTimeGroup');
-                        
-                        if(habitReminderTime && customTimeGroup) {
-                            habitReminderTime.addEventListener('change', function() {
-                                customTimeGroup.style.display = this.value === 'custom' ? 'block' : 'none';
-                            });
-                        }
-                    });
-                    </script>
+                        });
+                    }
+                });
+                </script>
                 
                 <!-- Privacy Tab -->
                 <div class="tab-pane fade" id="privacy" role="tabpanel" aria-labelledby="privacy-tab">

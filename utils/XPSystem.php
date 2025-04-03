@@ -1,4 +1,3 @@
-
 <?php
 // utils/XPSystem.php - XP and level management
 class XPSystem {
@@ -7,9 +6,11 @@ class XPSystem {
     private $levels_table = 'levels';
     private $achievements_table = 'user_achievements';
     private $notifications_table = 'notifications';
+    private $notificationHelper;
     
     public function __construct($db) {
         $this->conn = $db;
+        $this->notificationHelper = new NotificationHelper($db);
     }
     
     // Award XP to a user
@@ -44,13 +45,15 @@ class XPSystem {
             ];
         }
         
-        // Create XP notification
-        $this->createNotification(
-            $user_id, 
-            'xp', 
-            'XP Earned', 
-            'You earned ' . $xp_amount . ' XP for ' . $activity_description
-        );
+        // Create XP notification only if enabled
+        $notification_data = [
+            'user_id' => $user_id,
+            'type' => 'xp',
+            'title' => 'XP Earned',
+            'message' => "You earned {$xp_amount} XP for {$activity_description}"
+        ];
+        
+        $this->notificationHelper->createNotificationIfEnabled($notification_data);
         
         // Check if user should level up
         $new_xp = $current_xp + $xp_amount;
@@ -106,11 +109,16 @@ class XPSystem {
             // Add achievement
             $this->addAchievement($user_id, $level['level_number']);
             
-            // Create level-up notification
-            $message = "Congratulations! You've reached Level " . $level['level_number'] . " - " . $level['title'] . 
-                      " and earned the " . $level['badge_name'] . " badge!";
+            // Create level-up notification only if enabled
+            $notification_data = [
+                'user_id' => $user_id,
+                'type' => 'level',
+                'title' => 'Level Up!',
+                'message' => "Congratulations! You've reached Level " . $level['level_number'] . " - " . $level['title'] . 
+                      " and earned the " . $level['badge_name'] . " badge!"
+            ];
             
-            $this->createNotification($user_id, 'level', 'Level Up!', $message);
+            $this->notificationHelper->createNotificationIfEnabled($notification_data);
         }
         
         return [
@@ -149,20 +157,6 @@ class XPSystem {
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
         $stmt->bindParam(':level_id', $level['id']);
-        
-        return $stmt->execute();
-    }
-    
-    // Create a notification
-    private function createNotification($user_id, $type, $title, $message) {
-        $query = "INSERT INTO " . $this->notifications_table . " (user_id, type, title, message) 
-                  VALUES (:user_id, :type, :title, :message)";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':user_id', $user_id);
-        $stmt->bindParam(':type', $type);
-        $stmt->bindParam(':title', $title);
-        $stmt->bindParam(':message', $message);
         
         return $stmt->execute();
     }

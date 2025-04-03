@@ -1,21 +1,22 @@
-
 <?php
 // controllers/ChallengeController.php - Challenge controller
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../models/Challenge.php';
 require_once __DIR__ . '/../utils/XPSystem.php';
-
+require_once __DIR__ . '/../utils/NotificationHelper.php';
 
 class ChallengeController {
     private $conn;
     private $challenge;
     private $xpSystem;
+    private $notificationHelper;
     
     public function __construct() {
         global $conn;
         $this->conn = $conn;
         $this->challenge = new Challenge($conn);
         $this->xpSystem = new XPSystem($conn);
+        $this->notificationHelper = new NotificationHelper($conn);
     }
     
     // Get all challenges
@@ -208,6 +209,16 @@ class ChallengeController {
             if($this->challenge->areAllTasksCompleted($user_id)) {
                 // Award XP
                 $xp_result = $this->xpSystem->awardXP($user_id, $this->challenge->xp_reward, 'challenge', 'Completed challenge: ' . $this->challenge->title);
+                
+                // Create challenge-specific notification only if enabled
+                $notification_data = [
+                    'user_id' => $user_id,
+                    'type' => 'challenge',
+                    'title' => 'Challenge Completed',
+                    'message' => "Congratulations! You completed the challenge: {$this->challenge->title}"
+                ];
+                
+                $this->notificationHelper->createNotificationIfEnabled($notification_data);
                 
                 $result['challenge_completed'] = true;
                 $result['xp_awarded'] = $this->challenge->xp_reward;

@@ -6,15 +6,18 @@ require_once __DIR__ . '/../models/Community.php';
 require_once __DIR__ . '/../controllers/HabitController.php';
 require_once __DIR__ . '/../controllers/GoalController.php';
 require_once __DIR__ . '/../controllers/ChallengeController.php';
+require_once __DIR__ . '/../helpers/NotificationHelper.php';
 
 class CommunityController {
     private $conn;
     private $community;
+    private $notificationHelper;
     
     public function __construct() {
         global $conn;
         $this->conn = $conn;
         $this->community = new Community($conn);
+        $this->notificationHelper = new NotificationHelper($conn);
     }
     
     // Search for users
@@ -454,6 +457,25 @@ private function checkPerfectionistAchievement($user_id) {
         }
         
         if($this->community->sendFriendRequest($sender_id, $recipient_id)) {
+            // Get sender username
+            $query = "SELECT username FROM users WHERE id = :user_id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':user_id', $sender_id);
+            $stmt->execute();
+            $sender = $stmt->fetch(PDO::FETCH_ASSOC);
+            $sender_username = $sender ? $sender['username'] : 'A user';
+            
+            // Create notification
+            $notification_data = [
+                'user_id' => $recipient_id,
+                'type' => 'friend_request',
+                'title' => 'New Friend Request',
+                'message' => "{$sender_username} sent you a friend request",
+                'link_data' => json_encode(['type' => 'profile', 'id' => $sender_id])
+            ];
+            
+            $this->notificationHelper->createNotificationIfEnabled($notification_data);
+            
             return [
                 'success' => true,
                 'message' => 'Friend request sent'
@@ -468,7 +490,38 @@ private function checkPerfectionistAchievement($user_id) {
     
     // Accept friend request
     public function acceptFriendRequest($request_id, $user_id) {
+        // Get the sender details
+        $query = "SELECT fr.sender_id, u.username 
+                  FROM friend_requests fr 
+                  JOIN users u ON fr.sender_id = u.id 
+                  WHERE fr.id = :request_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':request_id', $request_id);
+        $stmt->execute();
+        $request = $stmt->fetch(PDO::FETCH_ASSOC);
+        
         if($this->community->acceptFriendRequest($request_id, $user_id)) {
+            // Get recipient username
+            $query = "SELECT username FROM users WHERE id = :user_id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':user_id', $user_id);
+            $stmt->execute();
+            $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
+            $recipient_username = $recipient ? $recipient['username'] : 'A user';
+            
+            // Create notification for the sender
+            if ($request) {
+                $notification_data = [
+                    'user_id' => $request['sender_id'],
+                    'type' => 'friend_accepted',
+                    'title' => 'Friend Request Accepted',
+                    'message' => "{$recipient_username} accepted your friend request",
+                    'link_data' => json_encode(['type' => 'profile', 'id' => $user_id])
+                ];
+                
+                $this->notificationHelper->createNotificationIfEnabled($notification_data);
+            }
+            
             return [
                 'success' => true,
                 'message' => 'Friend request accepted'
@@ -548,6 +601,31 @@ private function checkPerfectionistAchievement($user_id) {
         }
         
         if($this->community->inviteToChallenge($challenge_id, $sender_id, $recipient_id)) {
+            // Get sender username and challenge title
+            $query = "SELECT u.username, c.title
+                      FROM users u
+                      JOIN challenges c ON c.id = :challenge_id
+                      WHERE u.id = :user_id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':user_id', $sender_id);
+            $stmt->bindParam(':challenge_id', $challenge_id);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            $sender_username = $result ? $result['username'] : 'A user';
+            $challenge_title = $result ? $result['title'] : 'a challenge';
+            
+            // Create notification only if enabled
+            $notification_data = [
+                'user_id' => $recipient_id,
+                'type' => 'challenge',
+                'title' => 'Challenge Invitation',
+                'message' => "{$sender_username} invited you to join the challenge: {$challenge_title}",
+                'link_data' => json_encode(['type' => 'challenge', 'id' => $challenge_id])
+            ];
+            
+            $this->notificationHelper->createNotificationIfEnabled($notification_data);
+            
             return [
                 'success' => true,
                 'message' => 'Challenge invitation sent'

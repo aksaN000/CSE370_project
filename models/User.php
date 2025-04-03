@@ -1,4 +1,3 @@
-
 <?php
 // models/User.php - User model
 class User {
@@ -414,8 +413,20 @@ class User {
         return $stmt->rowCount() > 0;
     }
 
-    // Create a level-up notification
+    // Create a level-up notification with respect to notification settings
     private function createLevelUpNotification($level_number) {
+        // Check if level-up notifications are enabled
+        $query = "SELECT level_up_notifications FROM user_settings WHERE user_id = :user_id LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $this->id);
+        $stmt->execute();
+        
+        $settings = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($settings && $settings['level_up_notifications'] != 1) {
+            // Level-up notifications are disabled
+            return;
+        }
+        
         // Query to get level details
         $query = "SELECT title, badge_name FROM levels WHERE level_number = :level_number LIMIT 0,1";
         
@@ -436,14 +447,12 @@ class User {
             $insert_query = "INSERT INTO notifications(user_id, type, title, message) 
                             VALUES(:user_id, 'level', 'Level Up!', :message)";
             
-            // Prepare statement
-            $insert_stmt = $this->conn->prepare($insert_query);
-            
             // Create message
             $message = "Congratulations! You've reached Level " . $level_number . " - " . $row['title'] . 
                       " and earned the " . $row['badge_name'] . " badge!";
             
             // Bind parameters
+            $insert_stmt = $this->conn->prepare($insert_query);
             $insert_stmt->bindParam(':user_id', $this->id);
             $insert_stmt->bindParam(':message', $message);
             

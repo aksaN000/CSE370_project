@@ -4,18 +4,20 @@
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../models/Goal.php';
 require_once __DIR__ . '/../utils/XPSystem.php';
-
+require_once __DIR__ . '/../utils/NotificationHelper.php';
 
 class GoalController {
     private $conn;
     private $goal;
     private $xpSystem;
+    private $notificationHelper;
     
     public function __construct() {
         global $conn;
         $this->conn = $conn;
         $this->goal = new Goal($conn);
         $this->xpSystem = new XPSystem($conn);
+        $this->notificationHelper = new NotificationHelper($conn);
     }
     
     // Get all goals for a user
@@ -41,6 +43,16 @@ class GoalController {
         
         // Create the goal
         if($this->goal->create()) {
+            // Optional: Create a notification for goal creation if needed
+            $notification_data = [
+                'user_id' => $this->goal->user_id,
+                'type' => 'goal',
+                'title' => 'New Goal Created',
+                'message' => "You've created a new goal: {$this->goal->title}"
+            ];
+            
+            $this->notificationHelper->createNotificationIfEnabled($notification_data);
+            
             return [
                 'success' => true,
                 'message' => 'Goal created successfully',
@@ -111,6 +123,16 @@ class GoalController {
                 // Award XP to the user
                 $xp_result = $this->xpSystem->awardXP($user_id, $this->goal->xp_reward, 'goal', 'Completed goal: ' . $this->goal->title);
                 
+                // Create goal-specific notification only if enabled
+                $notification_data = [
+                    'user_id' => $user_id,
+                    'type' => 'goal',
+                    'title' => 'Goal Completed',
+                    'message' => "Congratulations! You completed the goal: {$this->goal->title}"
+                ];
+                
+                $this->notificationHelper->createNotificationIfEnabled($notification_data);
+                
                 $result['xp_awarded'] = $this->goal->xp_reward;
                 $result['level_up'] = $xp_result['level_up'] ?? false;
                 $result['new_level'] = $xp_result['new_level'] ?? null;
@@ -139,6 +161,16 @@ class GoalController {
         
         // Delete the goal
         if($this->goal->delete()) {
+            // Optional: Create a notification for goal deletion if needed
+            $notification_data = [
+                'user_id' => $user_id,
+                'type' => 'goal',
+                'title' => 'Goal Deleted',
+                'message' => "You've deleted the goal: {$this->goal->title}"
+            ];
+            
+            $this->notificationHelper->createNotificationIfEnabled($notification_data);
+            
             return [
                 'success' => true,
                 'message' => 'Goal deleted successfully'
