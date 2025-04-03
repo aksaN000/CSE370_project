@@ -4,7 +4,7 @@
 // Include auth controller
 require_once __DIR__ . '/../controllers/AuthController.php';
 require_once __DIR__ . '/../utils/helpers.php';
-
+require_once __DIR__ . '/../controllers/AchievementController.php';
 
 $authController = new AuthController();
 
@@ -17,17 +17,47 @@ if(!$authController->isLoggedIn()) {
 // Get logged in user
 $user = $authController->getLoggedInUser();
 
-// Get user achievements
-$query = "SELECT l.*, ua.unlocked_at 
-          FROM user_achievements ua
-          JOIN levels l ON ua.level_id = l.id
-          WHERE ua.user_id = :user_id
-          ORDER BY l.level_number ASC";
+// Initialize achievement controller
+$achievementController = new AchievementController();
 
-$stmt = $GLOBALS['conn']->prepare($query);
-$stmt->bindParam(':user_id', $user->id);
-$stmt->execute();
-$achievements = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Get user achievements
+$achievements = $achievementController->getUserAchievements($user->id);
+$level_achievements = $achievements['level_achievements'];
+$unlocked_special_achievements = $achievements['special_achievements'];
+
+// Define special achievements (for display, whether unlocked or not)
+$special_achievements = [
+    [
+        'name' => 'Early Bird',
+        'description' => 'Complete 5 habits before 9 AM',
+        'icon' => 'sunrise',
+        'color' => 'warning'
+    ],
+    [
+        'name' => 'Perfectionist',
+        'description' => 'Complete all habits for 7 consecutive days',
+        'icon' => 'calendar-check',
+        'color' => 'success'
+    ],
+    [
+        'name' => 'Goal Crusher',
+        'description' => 'Complete 10 goals',
+        'icon' => 'bullseye',
+        'color' => 'danger'
+    ],
+    [
+        'name' => 'Social Butterfly',
+        'description' => 'Join and complete 5 challenges',
+        'icon' => 'people',
+        'color' => 'primary'
+    ],
+    [
+        'name' => 'Deep Thinker',
+        'description' => 'Write 20 journal entries',
+        'icon' => 'journal-text',
+        'color' => 'info'
+    ]
+];
 
 // Get all levels to show locked achievements too
 $query = "SELECT * FROM levels ORDER BY level_number ASC";
@@ -103,7 +133,7 @@ include '../views/partials/header.php';
                 <?php
                 // Create a lookup of unlocked achievements for easy access
                 $unlocked_achievements = [];
-                foreach($achievements as $achievement) {
+                foreach($level_achievements as $achievement) {
                     $unlocked_achievements[$achievement['level_number']] = $achievement;
                 }
                 
@@ -219,63 +249,42 @@ include '../views/partials/header.php';
                 <?php endforeach; ?>
             </div>
             
-            <!-- Special Achievements (for future implementation) -->
+            <!-- Special Achievements -->
             <h3 class="mt-5 mb-4">Special Achievements</h3>
             
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> Special achievements will be available in a future update. Complete habits, reach goals, and join challenges to earn special badges!
+            <div class="alert alert-info mb-4">
+                <i class="bi bi-info-circle"></i> Complete habits, reach goals, and join challenges to earn special badges!
             </div>
-            
+
             <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-4">
-                <!-- These are placeholder achievements for future implementation -->
-                <?php
-                $special_achievements = [
-                    [
-                        'name' => 'Early Bird',
-                        'description' => 'Complete 5 habits before 9 AM',
-                        'icon' => 'sunrise',
-                        'color' => 'warning'
-                    ],
-                    [
-                        'name' => 'Perfectionist',
-                        'description' => 'Complete all habits for 7 consecutive days',
-                        'icon' => 'calendar-check',
-                        'color' => 'success'
-                    ],
-                    [
-                        'name' => 'Goal Crusher',
-                        'description' => 'Complete 10 goals',
-                        'icon' => 'bullseye',
-                        'color' => 'danger'
-                    ],
-                    [
-                        'name' => 'Social Butterfly',
-                        'description' => 'Join and complete 5 challenges',
-                        'icon' => 'people',
-                        'color' => 'primary'
-                    ],
-                    [
-                        'name' => 'Deep Thinker',
-                        'description' => 'Write 20 journal entries',
-                        'icon' => 'journal-text',
-                        'color' => 'info'
-                    ]
-                ];
-                
-                foreach($special_achievements as $achievement):
-                ?>
+                <?php foreach($special_achievements as $achievement): ?>
+                    <?php 
+                    // Check if this achievement is unlocked
+                    $is_unlocked = false;
+                    foreach ($unlocked_special_achievements as $unlocked) {
+                        if ($unlocked['name'] === $achievement['name']) {
+                            $is_unlocked = true;
+                            break;
+                        }
+                    }
+                    ?>
                     <div class="col">
-                        <div class="card h-100 achievement-card locked">
+                        <div class="card h-100 achievement-card <?php echo $is_unlocked ? '' : 'locked'; ?>">
                             <div class="card-body text-center">
                                 <div class="achievement-icon">
                                     <i class="bi bi-<?php echo $achievement['icon']; ?>-fill text-<?php echo $achievement['color']; ?>"></i>
                                 </div>
                                 <h5 class="card-title"><?php echo $achievement['name']; ?></h5>
                                 <p class="card-text small"><?php echo $achievement['description']; ?></p>
-                                <span class="badge bg-secondary">Coming Soon</span>
+                                
+                                <?php if($is_unlocked): ?>
+                                    <span class="badge bg-success">Unlocked</span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary">Locked</span>
+                                <?php endif; ?>
                             </div>
                             <div class="card-footer text-muted text-center">
-                                Future achievement
+                                <?php echo $is_unlocked ? 'Achievement Completed!' : 'Keep trying!'; ?>
                             </div>
                         </div>
                     </div>
@@ -285,8 +294,43 @@ include '../views/partials/header.php';
     </div>
 </div>
 
+<style>
+.achievement-card {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.achievement-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.achievement-card.locked {
+    opacity: 0.7;
+}
+
+.achievement-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.level-badge {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+    color: white;
+    font-size: 2.5rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+</style>
+
 <?php
 // Include footer
 include __DIR__ . '/../views/partials/footer.php';
-
 ?>
