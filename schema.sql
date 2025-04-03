@@ -303,3 +303,9 @@ CREATE INDEX IF NOT EXISTS idx_friend_requests_sender ON friend_requests(sender_
 CREATE INDEX IF NOT EXISTS idx_user_friends_user ON user_friends(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_friends_friend ON user_friends(friend_id);
 CREATE INDEX IF NOT EXISTS idx_leaderboard_category ON leaderboard_entries(category, rank);
+
+
+
+ALTER TABLE user_settings 
+MODIFY COLUMN enable_animations TINYINT(1) NOT NULL DEFAULT 1,
+MODIFY COLUMN compact_mode TINYINT(1) NOT NULL DEFAULT 0;

@@ -15,6 +15,12 @@ if(isset($_SESSION['user_id']) && (!isset($_SESSION['user_theme']) || !isset($_S
 $current_theme = $_SESSION['user_theme'] ?? 'light';
 $color_scheme = $_SESSION['color_scheme'] ?? 'default';
 
+// Determine animation state
+$enable_animations = 1; // Default to true
+if (isset($userSettings['enable_animations'])) {
+    $enable_animations = $userSettings['enable_animations'];
+}
+
 $html_theme = 'light';
 if($current_theme === 'dark') {
     $html_theme = 'dark';
@@ -22,6 +28,7 @@ if($current_theme === 'dark') {
     $system_dark = isset($_COOKIE['system_dark']) && $_COOKIE['system_dark'] === 'true';
     $html_theme = $system_dark ? 'dark' : 'light';
 }
+
 // Initialize settings controller if needed and not already initialized
 if(!isset($settingsController) && isset($user) && $user) {
     require_once __DIR__ . '/../../controllers/SettingsController.php';
@@ -34,6 +41,11 @@ if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] && !isset($unreadNoti
     $notificationController = new NotificationController();
     $unreadNotifications = $notificationController->getUnreadNotifications($_SESSION['user_id'], 5);
 }
+
+// Prepare theme classes
+$themeClasses = [];
+$themeClasses[] = 'color-' . $color_scheme;
+$themeClasses[] = $enable_animations ? 'enable-animations' : '';
 ?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="<?php echo $html_theme; ?>" class="color-<?php echo $color_scheme; ?>">
@@ -57,20 +69,10 @@ if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] && !isset($unreadNoti
     <!-- Favicon -->
     <link rel="shortcut icon" href="<?php echo strpos($_SERVER['PHP_SELF'], '/views/') !== false ? '../' : ''; ?>assets/images/favicon.png" type="image/png">
     
-    <?php
-    // Set the theme based on user preference
-    $theme = 'light'; // Default theme
-    if(isset($settingsController) && isset($user)) {
-        $userSettings = $settingsController->getUserSettings($user->id);
-        if(isset($userSettings['theme'])) {
-            $theme = $userSettings['theme'];
-        }
-    }
-    ?>
     <script>
         // Set initial theme before page load to prevent flashing
         (function() {
-            let storedTheme = localStorage.getItem('habit-tracker-theme') || '<?php echo $theme; ?>';
+            let storedTheme = localStorage.getItem('habit-tracker-theme') || '<?php echo $current_theme; ?>';
             
             if(storedTheme === 'dark') {
                 document.documentElement.setAttribute('data-bs-theme', 'dark');
@@ -85,39 +87,8 @@ if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] && !isset($unreadNoti
     </script>
 </head>
 <body class="<?php 
-    $theme = $_SESSION['user_theme'] ?? 'light';
-    if($theme === 'system') {
-        $theme = (isset($_COOKIE['system_dark']) && $_COOKIE['system_dark'] === 'true') ? 'dark' : 'light';
-    }
-    echo 'data-custom-theme="' . $theme . '"';
-    // Apply theme classes based on user settings
-    $themeClasses = [];
-    
-    // Add color scheme class
-    if(isset($settingsController) && isset($user)) {
-        $userSettings = $settingsController->getUserSettings($user->id);
-        
-        // Add color scheme class
-        if(isset($userSettings['color_scheme'])) {
-            $themeClasses[] = 'color-' . $userSettings['color_scheme'];
-        } else {
-            $themeClasses[] = 'color-default';
-        }
-        
-        // Add animations class
-        if(isset($userSettings['enable_animations']) && $userSettings['enable_animations']) {
-            $themeClasses[] = 'enable-animations';
-        }
-        
-        // Add compact mode class
-        if(isset($userSettings['compact_mode']) && $userSettings['compact_mode']) {
-            $themeClasses[] = 'compact-mode';
-        }
-    } else {
-        $themeClasses[] = 'color-default';
-    }
-    
-    echo implode(' ', $themeClasses);
+    // Combine all theme classes
+    echo implode(' ', $themeClasses); 
 ?>">
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">

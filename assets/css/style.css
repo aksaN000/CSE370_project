@@ -709,3 +709,26 @@ body[data-custom-theme="dark"] .text-muted {
 [data-bs-theme="dark"] .profile-header .lead {
     color: rgba(255, 255, 255, 0.9);
 }
+/* Disable animations when not enabled */
+body:not(.enable-animations) * {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* Base animations */
+.enable-animations * {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Enhanced animations for specific elements */
+.enable-animations .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.enable-animations .btn {
+    transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.enable-animations .nav-link {
+    transition: color 0.3s ease, background-color 0.3s ease;
+}

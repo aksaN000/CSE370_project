@@ -68,29 +68,12 @@ class SettingsController {
     }
     
     // Create default settings for a user
-    public function createDefaultSettings($user_id) {
-        $query = "INSERT INTO " . $this->settings_table . " (
-            user_id, theme, color_scheme, enable_animations, compact_mode, 
-            email_notifications, habit_reminders, goal_updates, challenge_notifications, level_up_notifications,
-            email_daily, email_weekly, email_reminders, public_profile, show_stats, show_achievements, analytics_consent
-        ) VALUES (
-            :user_id, 'light', 'default', 1, 0, 
-            1, 1, 1, 1, 1,
-            1, 1, 0, 0, 0, 1, 1
-        )";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':user_id', $user_id);
-        return $stmt->execute();
-    }
-    
-    // Update theme settings
     public function updateThemeSettings($user_id, $theme, $color_scheme, $enable_animations, $compact_mode) {
-        // Check if settings exist
-        $settings = $this->getUserSettings($user_id);
-        
-        if(isset($settings['user_id'])) {
-            // Update existing settings
+        try {
+            // Ensure type conversion
+            $enable_animations = filter_var($enable_animations, FILTER_VALIDATE_BOOLEAN);
+            
+            // Existing settings update query
             $query = "UPDATE " . $this->settings_table . " SET 
                 theme = :theme,
                 color_scheme = :color_scheme,
@@ -98,37 +81,33 @@ class SettingsController {
                 compact_mode = :compact_mode,
                 updated_at = NOW()
             WHERE user_id = :user_id";
-        } else {
-            // Create new settings
-            $query = "INSERT INTO " . $this->settings_table . " (
-                user_id, theme, color_scheme, enable_animations, compact_mode, updated_at
-            ) VALUES (
-                :user_id, :theme, :color_scheme, :enable_animations, :compact_mode, NOW()
-            )";
-        }
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':user_id', $user_id);
-        $stmt->bindParam(':theme', $theme);
-        $stmt->bindParam(':color_scheme', $color_scheme);
-        $stmt->bindParam(':enable_animations', $enable_animations);
-        $stmt->bindParam(':compact_mode', $compact_mode);
-        
-        if($stmt->execute()) {
-            // Also update session variables for immediate effect
-            $_SESSION['user_theme'] = $theme;
-            $_SESSION['color_scheme'] = $color_scheme;
-            $_SESSION['enable_animations'] = $enable_animations;
-            $_SESSION['compact_mode'] = $compact_mode;
             
-            return [
-                'success' => true,
-                'message' => 'Theme settings updated successfully'
-            ];
-        } else {
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':user_id', $user_id);
+            $stmt->bindParam(':theme', $theme);
+            $stmt->bindParam(':color_scheme', $color_scheme);
+            $stmt->bindParam(':enable_animations', $enable_animations, PDO::PARAM_BOOL);
+            $stmt->bindParam(':compact_mode', $compact_mode, PDO::PARAM_BOOL);
+            
+            if($stmt->execute()) {
+                // Update session variables
+                $_SESSION['enable_animations'] = $enable_animations;
+                
+                return [
+                    'success' => true,
+                    'message' => 'Theme settings updated successfully'
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Failed to update theme settings'
+                ];
+            }
+        } catch (Exception $e) {
+            error_log('Theme settings update error: ' . $e->getMessage());
             return [
                 'success' => false,
-                'message' => 'Failed to update theme settings'
+                'message' => 'Error updating theme settings: ' . $e->getMessage()
             ];
         }
     }
@@ -782,39 +761,146 @@ class SettingsController {
     
     // Helper method to get user data
     private function getUserData($user_id) {
-        $query = "SELECT id, username, email, current_xp, level, created_at, updated_at 
-                  FROM users WHERE id = :user_id LIMIT 0,1";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':user_id', $user_id);
-        $stmt->execute();
-        
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        try {
+            $query = "SELECT 
+                u.id, 
+                u.username, 
+                u.email, 
+                u.current_xp, 
+                u.level, 
+                u.created_at, 
+                u.updated_at,
+                us.profile_visibility,
+                us.public_profile,
+                us.show_stats,
+                us.show_achievements
+            FROM users u
+            LEFT JOIN user_settings us ON u.id = us.user_id
+            WHERE u.id = :user_id 
+            LIMIT 0,1";
+            
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$userData) {
+                return null;
+            }
+            
+            // Ensure default values if not set
+            $userData['profile_visibility'] = $userData['profile_visibility'] ?? 'private';
+            $userData['public_profile'] = $userData['public_profile'] ?? 0;
+            $userData['show_stats'] = $userData['show_stats'] ?? 0;
+            $userData['show_achievements'] = $userData['show_achievements'] ?? 1;
+            
+            return $userData;
+        } catch (PDOException $e) {
+            error_log('Error fetching user data: ' . $e->getMessage());
+            return null;
+        }
     }
     
     // Helper method to get habit data
     private function getHabitData($user_id) {
-        $query = "SELECT h.*, c.name as category_name 
-                  FROM habits h
-                  LEFT JOIN categories c ON h.category_id = c.id 
-                  WHERE h.user_id = :user_id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':user_id', $user_id);
-        $stmt->execute();
-        
-        $habits = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        // Get completions for each habit
-        foreach($habits as &$habit) {
-            $query = "SELECT * FROM habit_completions 
-                      WHERE habit_id = :habit_id ORDER BY completion_date ASC";
+        try {
+            // Fetch habits with category information in one query
+            $query = "SELECT 
+                h.id, 
+                h.user_id, 
+                h.category_id, 
+                h.title, 
+                h.description, 
+                h.frequency_type, 
+                h.frequency_value, 
+                h.start_date, 
+                h.end_date, 
+                h.xp_reward,
+                h.created_at,
+                c.name as category_name,
+                c.color as category_color,
+                (SELECT COUNT(*) FROM habit_completions hc WHERE hc.habit_id = h.id) as total_completions,
+                (SELECT MAX(completion_date) FROM habit_completions hc WHERE hc.habit_id = h.id) as last_completion_date
+            FROM habits h
+            LEFT JOIN categories c ON h.category_id = c.id
+            WHERE h.user_id = :user_id";
+            
             $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':habit_id', $habit['id']);
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
             $stmt->execute();
             
-            $habit['completions'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $habits = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Fetch completions for habits using a single query
+            if (!empty($habits)) {
+                $habit_ids = array_column($habits, 'id');
+                $placeholders = implode(',', array_fill(0, count($habit_ids), '?'));
+                
+                $completion_query = "SELECT 
+                    habit_id, 
+                    completion_date, 
+                    created_at
+                FROM habit_completions 
+                WHERE habit_id IN ($placeholders)
+                ORDER BY completion_date ASC";
+                
+                $completion_stmt = $this->conn->prepare($completion_query);
+                
+                // Bind habit IDs
+                foreach ($habit_ids as $index => $id) {
+                    $completion_stmt->bindValue($index + 1, $id, PDO::PARAM_INT);
+                }
+                
+                $completion_stmt->execute();
+                $completions = $completion_stmt->fetchAll(PDO::FETCH_GROUP);
+                
+                // Attach completions to habits
+                foreach ($habits as &$habit) {
+                    $habit['completions'] = $completions[$habit['id']] ?? [];
+                    
+                    // Calculate streak
+                    $habit['streak'] = $this->calculateHabitStreak($habit['completions']);
+                }
+            }
+            
+            return $habits;
+        } catch (PDOException $e) {
+            error_log('Error fetching habit data: ' . $e->getMessage());
+            return [];
+        }
+    }
+    
+    // Helper method to calculate habit streak
+    private function calculateHabitStreak($completions) {
+        if (empty($completions)) {
+            return 0;
         }
         
-        return $habits;
+        // Sort completions by date
+        usort($completions, function($a, $b) {
+            return strtotime($a['completion_date']) - strtotime($b['completion_date']);
+        });
+        
+        $streak = 1;
+        $max_streak = 1;
+        $last_date = new DateTime($completions[0]['completion_date']);
+        
+        for ($i = 1; $i < count($completions); $i++) {
+            $current_date = new DateTime($completions[$i]['completion_date']);
+            $diff = $last_date->diff($current_date);
+            
+            if ($diff->days === 1) {
+                $streak++;
+                $max_streak = max($max_streak, $streak);
+            } elseif ($diff->days > 1) {
+                $streak = 1;
+            }
+            
+            $last_date = $current_date;
+        }
+        
+        return $max_streak;
     }
     
     // Helper method to get goal data

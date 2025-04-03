@@ -1173,21 +1173,22 @@ include '../views/partials/header.php';
                 });
             });
             const enableAnimationsToggle = document.getElementById('enableAnimations');
-            if(enableAnimationsToggle) {
+            if (enableAnimationsToggle) {
+                // Sync localStorage with checkbox state on page load
+                const storedAnimations = localStorage.getItem('habit-tracker-animations');
+                if (storedAnimations !== null) {
+                    enableAnimationsToggle.checked = storedAnimations !== 'false';
+                }
+
+                // Add change listener
                 enableAnimationsToggle.addEventListener('change', function() {
-                    if(this.checked) {
+                    // Update body class
+                    if (this.checked) {
                         document.body.classList.add('enable-animations');
                     } else {
                         document.body.classList.remove('enable-animations');
                     }
                 });
-                
-                // Initialize animations state on page load
-                if(enableAnimationsToggle.checked) {
-                    document.body.classList.add('enable-animations');
-                } else {
-                    document.body.classList.remove('enable-animations');
-                }
             }
 </script>
 
