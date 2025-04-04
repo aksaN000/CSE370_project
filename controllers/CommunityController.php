@@ -6,7 +6,7 @@ require_once __DIR__ . '/../models/Community.php';
 require_once __DIR__ . '/../controllers/HabitController.php';
 require_once __DIR__ . '/../controllers/GoalController.php';
 require_once __DIR__ . '/../controllers/ChallengeController.php';
-require_once __DIR__ . '/../helpers/NotificationHelper.php';
+require_once __DIR__ . '/../utils/NotificationHelper.php';
 
 class CommunityController {
     private $conn;

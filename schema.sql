@@ -309,3 +309,14 @@ CREATE INDEX IF NOT EXISTS idx_leaderboard_category ON leaderboard_entries(categ
 ALTER TABLE user_settings 
 MODIFY COLUMN enable_animations TINYINT(1) NOT NULL DEFAULT 1,
 MODIFY COLUMN compact_mode TINYINT(1) NOT NULL DEFAULT 0;
+
+
+CREATE TABLE IF NOT EXISTS password_resets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(100) NOT NULL,
+    token VARCHAR(64) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (email),
+    INDEX (token)
+);

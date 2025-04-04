@@ -111,7 +111,116 @@ class SettingsController {
             ];
         }
     }
+    // Add this method to the SettingsController class in controllers/SettingsController.php
+
+/**
+ * 
+ * @param int $user_id The user ID
+ * @param array $settings Default settings array 
+ * @return bool Success status
+ */
+public function createDefaultSettings($user_id, $settings = []) {
+    // Set default values if not provided
+    $defaults = [
+        'theme' => 'light',
+        'color_scheme' => 'default',
+        'enable_animations' => 1,
+        'compact_mode' => 0,
+        'email_notifications' => 1,
+        'habit_reminders' => 1,
+        'goal_updates' => 1,
+        'challenge_notifications' => 1,
+        'level_up_notifications' => 1,
+        'email_daily' => 1,
+        'email_weekly' => 1,
+        'email_reminders' => 0,
+        'public_profile' => 0,
+        'profile_visibility' => 'private',
+        'show_stats' => 0,
+        'show_achievements' => 1,
+        'show_habits' => 0,
+        'show_goals' => 0,
+        'show_challenges' => 1,
+        'allow_challenge_invites' => 1,
+        'show_in_leaderboards' => 1,
+        'allow_friend_requests' => 1,
+        'analytics_consent' => 1,
+        'feature_improvement_consent' => 0,
+        'data_sharing' => 0
+    ];
     
+    // Merge provided settings with defaults
+    $settings = array_merge($defaults, $settings);
+    
+    try {
+        // Check if settings already exist for this user
+        $query = "SELECT * FROM " . $this->settings_table . " WHERE user_id = :user_id LIMIT 0,1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->execute();
+        
+        if($stmt->rowCount() > 0) {
+            // Settings already exist, no need to create
+            return true;
+        }
+        
+        // Create settings query with all fields
+        $query = "INSERT INTO " . $this->settings_table . " (
+            user_id, theme, color_scheme, enable_animations, compact_mode,
+            email_notifications, habit_reminders, goal_updates, challenge_notifications, level_up_notifications,
+            email_daily, email_weekly, email_reminders, public_profile, profile_visibility,
+            show_stats, show_achievements, show_habits, show_goals, show_challenges,
+            allow_challenge_invites, show_in_leaderboards, allow_friend_requests,
+            analytics_consent, feature_improvement_consent, data_sharing,
+            created_at, updated_at
+        ) VALUES (
+            :user_id, :theme, :color_scheme, :enable_animations, :compact_mode,
+            :email_notifications, :habit_reminders, :goal_updates, :challenge_notifications, :level_up_notifications,
+            :email_daily, :email_weekly, :email_reminders, :public_profile, :profile_visibility,
+            :show_stats, :show_achievements, :show_habits, :show_goals, :show_challenges,
+            :allow_challenge_invites, :show_in_leaderboards, :allow_friend_requests,
+            :analytics_consent, :feature_improvement_consent, :data_sharing,
+            NOW(), NOW()
+        )";
+        
+        $stmt = $this->conn->prepare($query);
+        
+        // Bind parameters
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->bindParam(':theme', $settings['theme']);
+        $stmt->bindParam(':color_scheme', $settings['color_scheme']);
+        $stmt->bindParam(':enable_animations', $settings['enable_animations']);
+        $stmt->bindParam(':compact_mode', $settings['compact_mode']);
+        $stmt->bindParam(':email_notifications', $settings['email_notifications']);
+        $stmt->bindParam(':habit_reminders', $settings['habit_reminders']);
+        $stmt->bindParam(':goal_updates', $settings['goal_updates']);
+        $stmt->bindParam(':challenge_notifications', $settings['challenge_notifications']);
+        $stmt->bindParam(':level_up_notifications', $settings['level_up_notifications']);
+        $stmt->bindParam(':email_daily', $settings['email_daily']);
+        $stmt->bindParam(':email_weekly', $settings['email_weekly']);
+        $stmt->bindParam(':email_reminders', $settings['email_reminders']);
+        $stmt->bindParam(':public_profile', $settings['public_profile']);
+        $stmt->bindParam(':profile_visibility', $settings['profile_visibility']);
+        $stmt->bindParam(':show_stats', $settings['show_stats']);
+        $stmt->bindParam(':show_achievements', $settings['show_achievements']);
+        $stmt->bindParam(':show_habits', $settings['show_habits']);
+        $stmt->bindParam(':show_goals', $settings['show_goals']);
+        $stmt->bindParam(':show_challenges', $settings['show_challenges']);
+        $stmt->bindParam(':allow_challenge_invites', $settings['allow_challenge_invites']);
+        $stmt->bindParam(':show_in_leaderboards', $settings['show_in_leaderboards']);
+        $stmt->bindParam(':allow_friend_requests', $settings['allow_friend_requests']);
+        $stmt->bindParam(':analytics_consent', $settings['analytics_consent']);
+        $stmt->bindParam(':feature_improvement_consent', $settings['feature_improvement_consent']);
+        $stmt->bindParam(':data_sharing', $settings['data_sharing']);
+        
+        // Execute query
+        $stmt->execute();
+        return true;
+    } catch(Exception $e) {
+        error_log('Error creating default settings: ' . $e->getMessage());
+        return false;
+    }
+}
     // Update notification settings
     public function updateNotificationSettings(
         $user_id, 
