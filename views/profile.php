@@ -115,9 +115,6 @@ include '../views/partials/header.php';
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="edit-profile-tab" data-bs-toggle="tab" data-bs-target="#edit-profile" type="button" role="tab" aria-controls="edit-profile" aria-selected="false">Edit Profile</button>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="account-settings-tab" data-bs-toggle="tab" data-bs-target="#account-settings" type="button" role="tab" aria-controls="account-settings" aria-selected="false">Account Settings</button>
-                </li>
             </ul>
             
             <!-- Tab Content -->
@@ -391,82 +388,6 @@ include '../views/partials/header.php';
                                     <button type="submit" class="btn btn-primary">Update Profile</button>
                                 </div>
                             </form>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Account Settings Tab -->
-                <div class="tab-pane fade" id="account-settings" role="tabpanel" aria-labelledby="account-settings-tab">
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">Notification Settings</h5>
-                                </div>
-                                <div class="card-body">
-                                    <form action="profile.php" method="POST">
-                                        <input type="hidden" name="update_notifications" value="1">
-                                        
-                                        <div class="mb-3 form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="emailNotifications" checked>
-                                            <label class="form-check-label" for="emailNotifications">Email Notifications</label>
-                                        </div>
-                                        
-                                        <div class="mb-3 form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="habitReminders" checked>
-                                            <label class="form-check-label" for="habitReminders">Daily Habit Reminders</label>
-                                        </div>
-                                        
-                                        <div class="mb-3 form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="goalUpdates" checked>
-                                            <label class="form-check-label" for="goalUpdates">Goal Updates</label>
-                                        </div>
-                                        
-                                        <div class="mb-3 form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="challengeNotifications" checked>
-                                            <label class="form-check-label" for="challengeNotifications">Challenge Notifications</label>
-                                        </div>
-                                        
-                                        <div class="mb-3 form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="levelUpNotifications" checked>
-                                            <label class="form-check-label" for="levelUpNotifications">Level Up Notifications</label>
-                                        </div>
-                                        
-                                        <div class="text-end">
-                                            <button type="submit" class="btn btn-primary" disabled>Save Settings</button>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div class="card-footer">
-                                    <small class="text-muted">Email notification settings will be available in a future update.</small>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6 mb-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">Account Management</h5>
-                                </div>
-                                <div class="card-body">
-                                    <p class="text-muted mb-4">Manage your account settings and data.</p>
-                                    
-                                    <div class="d-grid gap-2">
-                                        <button class="btn btn-outline-primary" type="button" disabled>
-                                            <i class="bi bi-download"></i> Export My Data
-                                        </button>
-                                        <button class="btn btn-outline-warning" type="button" disabled>
-                                            <i class="bi bi-arrow-clockwise"></i> Reset Progress
-                                        </button>
-                                        <button class="btn btn-outline-danger" type="button" disabled>
-                                            <i class="bi bi-trash"></i> Delete Account
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="card-footer">
-                                    <small class="text-muted">Account management options will be available in a future update.</small>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

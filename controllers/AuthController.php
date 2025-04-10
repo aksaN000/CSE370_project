@@ -238,7 +238,7 @@ class AuthController {
     }
     
     // Get unread notifications for a user
-    public function getUnreadNotifications($user_id, $limit = 5) {
+    public function getUnreadNotifications($user_id, $limit = 100) {
         $notificationController = new NotificationController();
         return $notificationController->getUnreadNotifications($user_id, $limit);
     }

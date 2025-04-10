@@ -1,9 +1,4 @@
 <?php
-// Create a new file: utils/NotificationHelper.php
-
-/**
- * Helper class for handling notifications with respect to user settings
- */
 class NotificationHelper {
     private $conn;
     

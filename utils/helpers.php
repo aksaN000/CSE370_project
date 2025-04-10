@@ -1,5 +1,6 @@
 <?php
 /**
+ * // utils/BadgeSystem.phps
  * Helper Functions
  * 
  * A collection of utility functions used throughout the application

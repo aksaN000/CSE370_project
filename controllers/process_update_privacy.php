@@ -1,4 +1,4 @@
-// Modified version of process_update_privacy.php - Create this file in the controllers directory
+
 
 <?php
 // controllers/process_update_privacy.php - Process privacy settings update

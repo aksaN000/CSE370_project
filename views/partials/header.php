@@ -39,7 +39,11 @@ if(!isset($settingsController) && isset($user) && $user) {
 if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] && !isset($unreadNotifications)) {
     require_once __DIR__ . '/../../controllers/NotificationController.php';
     $notificationController = new NotificationController();
-    $unreadNotifications = $notificationController->getUnreadNotifications($_SESSION['user_id'], 5);
+    // Change from 5 to a higher number like 10
+    $unreadNotifications = $notificationController->getUnreadNotifications($_SESSION['user_id'], 10);
+    
+    // Get total unread count for comparison
+    $totalUnreadCount = $notificationController->getNotificationCount($_SESSION['user_id'], true);
 }
 
 // Prepare theme classes
@@ -70,7 +74,6 @@ $themeClasses[] = $enable_animations ? 'enable-animations' : '';
     <link rel="shortcut icon" href="<?php echo strpos($_SERVER['PHP_SELF'], '/views/') !== false ? '../' : ''; ?>assets/images/favicon.png" type="image/png">
     
     <script>
-    <script>
     // Set initial theme before page load to prevent flashing
     (function() {
         const storedTheme = localStorage.getItem('habit-tracker-theme') || '<?php echo $current_theme; ?>';
@@ -90,7 +93,7 @@ $themeClasses[] = $enable_animations ? 'enable-animations' : '';
             }
         }
     })();
-</script>
+    </script>
 </head>
 <body class="<?php 
     // Combine all theme classes
@@ -148,7 +151,7 @@ $themeClasses[] = $enable_animations ? 'enable-animations' : '';
                                 <i class="bi bi-bell-fill"></i>
                                 <?php
                                 // Get unread notification count
-                                $unreadCount = isset($unreadNotifications) ? count($unreadNotifications) : 0;
+                                $unreadCount = isset($totalUnreadCount) ? $totalUnreadCount : 0;
                                 if($unreadCount > 0):
                                 ?>
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -203,9 +206,18 @@ $themeClasses[] = $enable_animations ? 'enable-animations' : '';
                                         </li>
                                         <li><hr class="dropdown-divider"></li>
                                     <?php endforeach; ?>
+                                    
+                                    <?php if($totalUnreadCount > count($unreadNotifications)): ?>
+                                        <li>
+                                            <a class="dropdown-item text-center" href="<?php echo strpos($_SERVER['PHP_SELF'], '/views/') !== false ? 'notifications.php' : 'views/notifications.php'; ?>">
+                                                <?php echo ($totalUnreadCount - count($unreadNotifications)); ?> more notifications
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
                                 <?php else: ?>
                                     <li><div class="dropdown-item text-center">No new notifications</div></li>
                                 <?php endif; ?>
+                                <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-center" href="<?php echo strpos($_SERVER['PHP_SELF'], '/views/') !== false ? 'notifications.php' : 'views/notifications.php'; ?>">See all notifications</a></li>
                             </ul>
                         </div>
