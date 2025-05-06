@@ -197,7 +197,7 @@ include '../views/partials/header.php';
             <!-- Charts Row 1 -->
             <div class="row mb-4">
                 <div class="col-md-6 mb-4">
-                    <div class="card">
+                    <div class="card analytics-chart-card">
                         <div class="card-header bg-primary text-white">
                             <h5 class="mb-0">Habit Completions Over Time</h5>
                         </div>
@@ -208,7 +208,7 @@ include '../views/partials/header.php';
                 </div>
                 
                 <div class="col-md-6 mb-4">
-                    <div class="card">
+                    <div class="card analytics-chart-card">
                         <div class="card-header bg-info text-white">
                             <h5 class="mb-0">Habits by Category</h5>
                         </div>
@@ -222,11 +222,11 @@ include '../views/partials/header.php';
                     </div>
                 </div>
             </div>
-            
+
             <!-- Charts Row 2 -->
             <div class="row mb-4">
                 <div class="col-md-6 mb-4">
-                    <div class="card">
+                    <div class="card analytics-chart-card">
                         <div class="card-header bg-success text-white">
                             <h5 class="mb-0">XP Progress</h5>
                         </div>
@@ -241,7 +241,7 @@ include '../views/partials/header.php';
                 </div>
                 
                 <div class="col-md-6 mb-4">
-                    <div class="card">
+                    <div class="card analytics-chart-card">
                         <div class="card-header bg-warning text-dark">
                             <h5 class="mb-0">Mood Tracker</h5>
                         </div>
@@ -372,6 +372,7 @@ include '../views/partials/header.php';
             type: 'line',
             data: habitProgressData,
             options: {
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         beginAtZero: true,
@@ -416,6 +417,7 @@ include '../views/partials/header.php';
             type: 'doughnut',
             data: categoryData,
             options: {
+                maintainAspectRatio: false,
                 responsive: true,
                 plugins: {
                     legend: {
@@ -453,6 +455,7 @@ include '../views/partials/header.php';
             type: 'line',
             data: xpData,
             options: {
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         beginAtZero: true,
@@ -535,6 +538,7 @@ include '../views/partials/header.php';
             type: 'bar',
             data: moodData,
             options: {
+                maintainAspectRatio: false,
                 scales: {
                     x: {
                         stacked: true

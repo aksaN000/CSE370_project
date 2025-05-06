@@ -20,7 +20,7 @@ class AuthController {
         $this->user = new User($conn);
     }
      // Update user profile
-     public function updateProfile($user_id, $username, $email, $current_password, $new_password = '', $confirm_password = '') {
+    public function updateProfile($user_id, $username, $email, $current_password, $new_password = '', $confirm_password = '') {
         $errors = [];
         
         // Validate username
@@ -53,6 +53,37 @@ class AuthController {
             }
         }
         
+        // Process profile picture upload if present
+        $profile_picture = null;
+        if(isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] == 0) {
+            // Validate file size (max 2MB)
+            if($_FILES['profile_picture']['size'] > 2 * 1024 * 1024) {
+                $errors[] = 'Profile picture must be less than 2MB';
+            }
+            
+            // Validate file type
+            $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+            $file_info = getimagesize($_FILES['profile_picture']['tmp_name']);
+            
+            if(!$file_info || !in_array($file_info['mime'], $allowed_types)) {
+                $errors[] = 'Only JPG, PNG, and GIF files are allowed';
+            }
+            
+            if(empty($errors)) {
+                // Generate unique filename
+                $file_ext = pathinfo($_FILES['profile_picture']['name'], PATHINFO_EXTENSION);
+                $filename = 'profile_' . $user_id . '_' . time() . '.' . $file_ext;
+                $upload_path = __DIR__ . '/../assets/uploads/profile_pictures/' . $filename;
+                
+                // Move uploaded file
+                if(move_uploaded_file($_FILES['profile_picture']['tmp_name'], $upload_path)) {
+                    $profile_picture = $filename;
+                } else {
+                    $errors[] = 'Failed to upload profile picture';
+                }
+            }
+        }
+        
         // If no errors, update profile
         if(empty($errors)) {
             // Get user
@@ -64,22 +95,30 @@ class AuthController {
                     $this->user->username = $username;
                     $this->user->email = $email;
                     
+                    // Set profile picture if uploaded
+                    if($profile_picture) {
+                        $this->user->profile_picture = $profile_picture;
+                    }
+                    
                     // Try to update profile
-                    if($this->user->updateProfile($username, $email)) {
+                    if($this->user->updateProfile($username, $email, $profile_picture)) {
                         // Update session variables
                         $_SESSION['username'] = $username;
                         $_SESSION['email'] = $email;
+                        if($profile_picture) {
+                            $_SESSION['profile_picture'] = $profile_picture;
+                        }
                         
                         // Try to update password if provided
                         if(!empty($new_password)) {
                             if($this->user->updatePassword($current_password, $new_password)) {
-                                return ['success' => true, 'message' => 'Profile and password updated successfully'];
+                                return ['success' => true, 'message' => 'Profile and password updated successfully', 'profile_picture' => $profile_picture];
                             } else {
                                 return ['success' => false, 'message' => 'Profile updated but failed to update password'];
                             }
                         }
                         
-                        return ['success' => true, 'message' => 'Profile updated successfully'];
+                        return ['success' => true, 'message' => 'Profile updated successfully', 'profile_picture' => $profile_picture];
                     } else {
                         return ['success' => false, 'message' => 'Failed to update profile. Email or username might already exist.'];
                     }

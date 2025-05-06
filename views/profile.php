@@ -86,7 +86,10 @@ include '../views/partials/header.php';
             <div class="profile-header text-center mb-4">
                 <div class="container">
                     <div class="mb-3">
-                        <img src="https://ui-avatars.com/api/?name=<?php echo urlencode($user->username); ?>&background=random&size=150" alt="Profile Avatar" class="profile-avatar">
+                        <img src="<?php echo !empty($user->profile_picture) ? '../assets/uploads/profile_pictures/' . $user->profile_picture : 'https://ui-avatars.com/api/?name=' . urlencode($user->username) . '&background=random&size=150'; ?>" 
+                            alt="Profile Avatar" 
+                            class="profile-avatar">
+                    
                     </div>
                     <h1 class="display-5 fw-bold"><?php echo $user->username; ?></h1>
                     <p class="lead">Member since <?php echo formatDate($user->created_at, 'F j, Y'); ?></p>
@@ -354,47 +357,95 @@ include '../views/partials/header.php';
                             <h5 class="mb-0">Edit Profile Information</h5>
                         </div>
                         <div class="card-body">
-                            <form action="profile.php" method="POST">
+                            <form action="profile.php" method="POST" enctype="multipart/form-data">
                                 <input type="hidden" name="update_profile" value="1">
+                                
+                                <div class="mb-4 text-center">
+                                    <img src="<?php echo !empty($user->profile_picture) ? '../assets/uploads/profile_pictures/' . $user->profile_picture : 'https://ui-avatars.com/api/?name=' . urlencode($user->username) . '&background=random&size=150'; ?>" 
+                                        alt="Profile Avatar" 
+                                        class="profile-avatar mb-3" 
+                                        id="profile-preview"
+                                        style="width: 150px; height: 150px; border-radius: 50%; border: 5px solid white; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);">
+                                    
+                                    <div class="mb-3">
+                                        <label for="profile_picture" class="form-label">Upload Profile Picture</label>
+                                        <input type="file" class="form-control" id="profile_picture" name="profile_picture" accept="image/*">
+                                        <div class="form-text">Max file size: 2MB. Supported formats: JPG, PNG, GIF</div>
+                                    </div>
+                                </div>
                                 
                                 <div class="mb-3">
                                     <label for="username" class="form-label">Username</label>
-                                    <input type="text" class="form-control" id="username" name="username" value="<?php echo $user->username; ?>" required>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                        <input type="text" class="form-control" id="username" name="username" value="<?php echo $user->username; ?>" required>
+                                    </div>
                                 </div>
                                 
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Email Address</label>
-                                    <input type="email" class="form-control" id="email" name="email" value="<?php echo $user->email; ?>" required>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                        <input type="email" class="form-control" id="email" name="email" value="<?php echo $user->email; ?>" required>
+                                    </div>
                                 </div>
                                 
                                 <div class="mb-3">
                                     <label for="current_password" class="form-label">Current Password</label>
-                                    <input type="password" class="form-control" id="current_password" name="current_password" placeholder="Enter your current password to confirm changes" required>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                        <input type="password" class="form-control" id="current_password" name="current_password" placeholder="Enter your current password to confirm changes" required>
+                                    </div>
+                                    <div class="form-text text-danger">Required to save any changes</div>
                                 </div>
                                 
                                 <h5 class="mt-4 mb-3">Change Password (Optional)</h5>
                                 
                                 <div class="mb-3">
                                     <label for="new_password" class="form-label">New Password</label>
-                                    <input type="password" class="form-control" id="new_password" name="new_password" placeholder="Leave blank to keep current password">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                        <input type="password" class="form-control" id="new_password" name="new_password" placeholder="Leave blank to keep current password">
+                                    </div>
                                 </div>
                                 
                                 <div class="mb-3">
                                     <label for="confirm_password" class="form-label">Confirm New Password</label>
-                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm new password">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm new password">
+                                    </div>
                                 </div>
                                 
-                                <div class="text-end">
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="reset" class="btn btn-outline-secondary me-md-2">Reset</button>
                                     <button type="submit" class="btn btn-primary">Update Profile</button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
-    </div>
-</div>
+
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const profileInput = document.getElementById('profile_picture');
+                    const profilePreview = document.getElementById('profile-preview');
+                    
+                    if (profileInput && profilePreview) {
+                        profileInput.addEventListener('change', function() {
+                            if (this.files && this.files[0]) {
+                                const reader = new FileReader();
+                                
+                                reader.onload = function(e) {
+                                    profilePreview.src = e.target.result;
+                                }
+                                
+                                reader.readAsDataURL(this.files[0]);
+                            }
+                        });
+                    }
+                });
+                </script>
 
 <?php
 // Include footer

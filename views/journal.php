@@ -392,7 +392,7 @@ include '../views/partials/header.php';
                     
                     <div class="col-md-4">
                         <!-- Mood Tracker -->
-                        <div class="card mb-4">
+                        <div class="card mb-4 mood-chart-card">
                             <div class="card-header bg-info text-white">
                                 <h5 class="mb-0">Mood Tracker</h5>
                             </div>
@@ -402,11 +402,11 @@ include '../views/partials/header.php';
                                         <i class="bi bi-info-circle"></i> Start creating journal entries to track your mood over time.
                                     </div>
                                 <?php else: ?>
-                                    <canvas id="moodChart" width="100%" height="200"></canvas>
+                                    <canvas id="moodChart"></canvas>
                                 <?php endif; ?>
                             </div>
                         </div>
-                        
+                                                
                         <!-- Recent Habits & Goals -->
                         <div class="card">
                             <div class="card-header bg-success text-white">
@@ -478,6 +478,7 @@ include '../views/partials/header.php';
                 }]
             },
             options: {
+                maintainAspectRatio: false,
                 responsive: true,
                 plugins: {
                     legend: {
@@ -489,9 +490,3 @@ include '../views/partials/header.php';
     });
 </script>
 <?php endif; ?>
-
-<?php
-// Include footer
-include __DIR__ . '/partials/footer.php';
-
-?>

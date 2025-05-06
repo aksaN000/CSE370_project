@@ -208,7 +208,7 @@ include '../views/partials/header.php';
                                              data-is-active="<?php echo $habitController->isActiveToday($habit['id']) ? 'active' : 'inactive'; ?>"
                                              data-streak="<?php echo $habit['streak']; ?>">
                                             
-                                            <div class="card h-100 habit-card <?php echo $habit['is_completed_today'] ? 'border-success' : 'border-primary'; ?>">
+                                             <div id="habit-<?php echo $habit['id']; ?>" class="card h-100 habit-card <?php echo $habit['is_completed_today'] ? 'border-success' : 'border-primary'; ?>">
                                                 <div class="card-header d-flex justify-content-between align-items-center <?php echo $habit['is_completed_today'] ? 'bg-success' : 'bg-primary'; ?> text-white">
                                                     <h5 class="mb-0"><?php echo $habit['title']; ?></h5>
                                                     <?php if($habit['streak'] > 1): ?>

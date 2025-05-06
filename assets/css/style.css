@@ -118,10 +118,28 @@ body {
     overflow-y: auto;
 }
 
-/* Journal card styles */
-.journal-entry .mood-icon {
-    font-size: 1.5rem;
-}
+/* Fixed height for mood chart card */
+.mood-chart-card .card-body {
+    height: 250px;
+    position: relative;
+  }
+  
+  .mood-chart-card .card-body canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  .mood-chart-card .alert {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    text-align: center;
+  }
 
 /* Profile page styles */
 .profile-header {
@@ -170,14 +188,27 @@ body {
     transform: none;
 }
 
-/* Analytics page styles */
-.analytics-card {
-    margin-bottom: 1.5rem;
-}
-
-.analytics-card .card-body {
+/* Fixed height for analytics chart cards */
+.analytics-chart-card .card-body {
     height: 300px;
-}
+    position: relative;
+  }
+  
+  .analytics-chart-card .card-body canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  .analytics-chart-card .alert {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+  }
 
 /* Dashboard welcome section */
 .welcome-section {

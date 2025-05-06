@@ -156,10 +156,10 @@ class User {
     // Get user by ID
     public function getUserById($id) {
         // Query
-        $query = "SELECT id, username, email, current_xp, level, created_at 
-                  FROM " . $this->table . " 
-                  WHERE id = :id 
-                  LIMIT 0,1";
+        $query = "SELECT id, username, email, password, current_xp, level, created_at 
+                FROM " . $this->table . " 
+                WHERE id = :id 
+                LIMIT 0,1";
         
         // Prepare statement
         $stmt = $this->conn->prepare($query);
@@ -178,6 +178,7 @@ class User {
             $this->id = $row['id'];
             $this->username = $row['username'];
             $this->email = $row['email'];
+            $this->password = $row['password']; // Added this line
             $this->current_xp = $row['current_xp'];
             $this->level = $row['level'];
             $this->created_at = $row['created_at'];
@@ -303,7 +304,7 @@ class User {
     }
     
     // Update user profile
-    public function updateProfile($username, $email) {
+    public function updateProfile($username, $email, $profile_picture = null) {
         // Sanitize input
         $this->username = htmlspecialchars(strip_tags($username));
         $this->email = htmlspecialchars(strip_tags($email));
@@ -313,12 +314,19 @@ class User {
             return false;
         }
         
-        // Create query
+        // Create base query
         $query = "UPDATE " . $this->table . " 
-                  SET username = :username, 
-                      email = :email,
-                      updated_at = NOW()
-                  WHERE id = :id";
+                SET username = :username, 
+                    email = :email,
+                    updated_at = NOW()";
+        
+        // Add profile picture to query if provided
+        if($profile_picture !== null) {
+            $query .= ", profile_picture = :profile_picture";
+            $this->profile_picture = $profile_picture;
+        }
+        
+        $query .= " WHERE id = :id";
         
         // Prepare statement
         $stmt = $this->conn->prepare($query);
@@ -327,6 +335,11 @@ class User {
         $stmt->bindParam(':username', $this->username);
         $stmt->bindParam(':email', $this->email);
         $stmt->bindParam(':id', $this->id);
+        
+        // Bind profile picture if present
+        if($profile_picture !== null) {
+            $stmt->bindParam(':profile_picture', $this->profile_picture);
+        }
         
         // Execute query
         if($stmt->execute()) {
