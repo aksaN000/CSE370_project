@@ -1,7 +1,6 @@
 <?php
 /**
  * Habit Tracker - Main Index File
- * This is the entry point for the application
  */
 
 // Start session
