@@ -7,7 +7,7 @@
  */
 
 /**
- * Format a date to a human-readable string
+ * Format a date to a readable string
  * 
  * @param string $date The date string to format
  * @param string $format The format to use (default: 'M j, Y')
