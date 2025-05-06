@@ -233,7 +233,7 @@ if($isLoggedIn) {
                     <h1 class="display-4 fw-bold mb-4">Transform Your Life With Better Habits</h1>
                     <p class="lead mb-5">Track your habits, build consistency, and achieve your goals with our powerful and intuitive habit tracking system.</p>
                     <div class="d-grid gap-3 d-md-flex">
-                        <a href="views/auth/register.php" class="btn btn-light btn-lg px-4 fw-semibold">Start Free Trial</a>
+                        <a href="views/auth/register.php" class="btn btn-light btn-lg px-4 fw-semibold">Start Free Now</a>
                         <a href="#features" class="btn btn-outline-light btn-lg px-4">Learn More</a>
                     </div>
                 </div>

@@ -1,6 +1,5 @@
 /**
  * Habit Tracker - Main JavaScript File
- * Contains client-side functionality for the application
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -48,23 +47,9 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Update UI
-                    const habitCard = document.getElementById('habit-' + habitId);
-                    habitCard.classList.add('border-success');
-                    habitCard.querySelector('.card-header').classList.add('bg-success');
-                    habitCard.querySelector('.card-header').classList.remove('bg-primary');
-                    
-                    // Replace form with completion message
-                    const formContainer = this.closest('.card-body');
-                    formContainer.innerHTML = '<div class="alert alert-success mb-0"><i class="bi bi-check-circle-fill"></i> Completed today!</div>';
-                    
-                    // Show success message
-                    showToast('Success', data.message, 'success');
-                    
-                    // If level up occurred, show special notification
-                    if (data.level_up) {
-                        showLevelUpModal(data.new_level);
-                    }
+                    // Instead of updating UI directly, we'll reload the page
+                    // This will ensure notifications are refreshed just like with goals
+                    window.location.reload();
                 } else {
                     // Show error message
                     showToast('Error', data.message, 'danger');

@@ -3,8 +3,8 @@
 
 $host = 'localhost';
 $db_name = 'habit_tracker';
-$username = 'root'; // Change if different
-$password = ''; // Change if different
+$username = 'root';
+$password = ''; 
 
 try {
     $conn = new PDO("mysql:host=$host;dbname=$db_name", $username, $password);

@@ -24,6 +24,7 @@ $habitController = new HabitController();
 $goalController = new GoalController();
 $challengeController = new ChallengeController();
 $notificationController = new NotificationController();
+$totalUnreadCount = $notificationController->getNotificationCount($user->id, true);
 
 // Get active habits for today
 $todayHabits = $habitController->getActiveHabitsForToday($user->id);

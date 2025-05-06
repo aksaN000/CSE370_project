@@ -1,6 +1,5 @@
 /* 
  * Habit Tracker - Custom CSS Styles
- * Main style file for the Habit Tracker application
  */
 
 /* Base Styles */
@@ -412,7 +411,7 @@ body {
 
 /* Color Schemes */
 
-/* Default (Blue) Color Scheme - No Override needed */
+/* Default (Blue) Color Scheme */
 .color-default {
     /* Uses the default --primary-color value */
 }

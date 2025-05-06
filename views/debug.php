@@ -1,6 +1,6 @@
 <?php
-// debug.php - Place this file in your main web directory
-// This file checks key components of your application
+// debug.php 
+// This file checks key components
 
 // Enable all error reporting
 ini_set('display_errors', 1);
